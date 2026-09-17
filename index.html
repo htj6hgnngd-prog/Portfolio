@@ -8,9 +8,12 @@
   <title>Портфолио</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://i.ytimg.com">
+  <link rel="preconnect" href="https://www.youtube-nocookie.com">
+  <link rel="preconnect" href="https://www-ccv.adobe.io" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=5" />
-  <link rel="stylesheet" href="/hotfix.css?v=5" />
+  <link rel="stylesheet" href="/styles.css?v=6" />
+  <link rel="stylesheet" href="/hotfix.css?v=6" />
 </head>
 <body>
   <header class="top-navigation">
@@ -37,13 +40,13 @@
       </div>
       <div class="section-content">
         <button class="featured-work" id="youtube-featured" type="button" aria-label="Смотреть выбранное видео">
-          <span class="media-frame"><img id="featured-image" src="https://i.ytimg.com/vi/pPTTScpvxMA/maxresdefault.jpg" alt=""><span class="play-mark"><span>▶</span></span></span>
+          <span class="media-frame"><img id="featured-image" src="https://i.ytimg.com/vi/pPTTScpvxMA/maxresdefault.jpg" alt="" fetchpriority="high" decoding="async"><span class="play-mark"><span>▶</span></span></span>
           <span class="work-meta"><strong id="featured-title">НИЖНИЙ НОВГОРОД</strong><span id="featured-role">ПОЛНАЯ СЪЁМКА</span></span>
         </button>
         <div class="work-strip" aria-label="Работы для YouTube">
-          <button class="work-thumb is-selected" type="button" data-video="0"><span class="thumb-image"><img src="https://i.ytimg.com/vi/pPTTScpvxMA/maxresdefault.jpg" alt=""><span class="play-mark play-mark--small"><span>▶</span></span></span><span class="thumb-copy"><strong>НИЖНИЙ НОВГОРОД</strong><span>ПОЛНАЯ СЪЁМКА</span></span></button>
-          <button class="work-thumb" type="button" data-video="1"><span class="thumb-image"><img src="https://i.ytimg.com/vi/RBRXIkmQUJI/maxresdefault.jpg" alt=""><span class="play-mark play-mark--small"><span>▶</span></span></span><span class="thumb-copy"><strong>ТАТАРСТАН</strong><span>ПОЛНАЯ СЪЁМКА</span></span></button>
-          <button class="work-thumb" type="button" data-video="2"><span class="thumb-image"><img src="https://i.ytimg.com/vi/FhwHKvgYwGo/maxresdefault.jpg" alt=""><span class="play-mark play-mark--small"><span>▶</span></span></span><span class="thumb-copy"><strong>МАРКЕТПЛЕЙСЫ</strong><span>СЪЁМКА БОЛЬШЕЙ ЧАСТИ ИНТЕРВЬЮ</span></span></button>
+          <button class="work-thumb is-selected" type="button" data-video="0"><span class="thumb-image"><img src="https://i.ytimg.com/vi/pPTTScpvxMA/hqdefault.jpg" alt="" loading="lazy" decoding="async"><span class="play-mark play-mark--small"><span>▶</span></span></span><span class="thumb-copy"><strong>НИЖНИЙ НОВГОРОД</strong><span>ПОЛНАЯ СЪЁМКА</span></span></button>
+          <button class="work-thumb" type="button" data-video="1"><span class="thumb-image"><img src="https://i.ytimg.com/vi/RBRXIkmQUJI/hqdefault.jpg" alt="" loading="lazy" decoding="async"><span class="play-mark play-mark--small"><span>▶</span></span></span><span class="thumb-copy"><strong>ТАТАРСТАН</strong><span>ПОЛНАЯ СЪЁМКА</span></span></button>
+          <button class="work-thumb" type="button" data-video="2"><span class="thumb-image"><img src="https://i.ytimg.com/vi/FhwHKvgYwGo/hqdefault.jpg" alt="" loading="lazy" decoding="async"><span class="play-mark play-mark--small"><span>▶</span></span></span><span class="thumb-copy"><strong>МАРКЕТПЛЕЙСЫ</strong><span>СЪЁМКА БОЛЬШЕЙ ЧАСТИ ИНТЕРВЬЮ</span></span></button>
         </div>
       </div>
     </section>
@@ -57,7 +60,7 @@
       <div class="section-label"><div class="section-number">03</div><h2>ИИ</h2><span class="label-rule"></span></div>
       <div class="section-content">
         <button class="featured-work ai-work" id="ai-featured" type="button" aria-label="Смотреть AI-рекламу">
-          <span class="media-frame ai-media-frame"><iframe src="https://www-ccv.adobe.io/v1/player/ccv/5-9tzVe57JY/embed?api_key=behance1&bgcolor=%23191919" title="Реклама товара для маркетплейса" tabindex="-1" aria-hidden="true"></iframe><span class="ai-cover" aria-hidden="true"></span><span class="play-mark"><span>▶</span></span></span>
+          <span class="media-frame ai-media-frame" id="ai-player-home"><iframe id="ai-player" src="https://www-ccv.adobe.io/v1/player/ccv/5-9tzVe57JY/embed?api_key=behance1&bgcolor=%23191919" title="Реклама товара для маркетплейса" tabindex="-1" aria-hidden="true" loading="lazy" allow="autoplay; fullscreen" allowfullscreen></iframe><span class="ai-cover" aria-hidden="true"></span><span class="play-mark"><span>▶</span></span></span>
           <span class="work-meta"><strong>РЕКЛАМА ТОВАРА ДЛЯ МАРКЕТПЛЕЙСА</strong><span>ИИ-РОЛИК</span></span>
         </button>
       </div>
@@ -90,6 +93,6 @@
     </div>
   </div>
 
-  <script src="/script.js?v=5" defer></script>
+  <script src="/script.js?v=6" defer></script>
 </body>
 </html>
