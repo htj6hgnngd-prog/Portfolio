@@ -1,14 +1,14 @@
 (() => {
   const photos = [
-    { src: "/assets/photos/reportage-01.jpg", alt: "Репортажный кадр сверху", ratio: 1418 / 1056 },
-    { src: "/assets/photos/reportage-02.jpg", alt: "Репортажный кадр на открытом воздухе", ratio: 1536 / 1024 },
-    { src: "/assets/photos/reportage-03.jpg", alt: "Портрет", ratio: 1024 / 1536 },
-    { src: "/assets/photos/reportage-04.jpg", alt: "Динамичный репортажный кадр", ratio: 1536 / 1024 },
-    { src: "/assets/photos/reportage-05.jpg", alt: "Детали оформления", ratio: 1536 / 1024 },
+    { src: "/assets/photos/reportage-01.jpg", alt: "Репортажный кадр пространства", ratio: 1418 / 1056 },
     { src: "/assets/photos/reportage-06.jpg", alt: "Гости мероприятия", ratio: 1536 / 1024 },
-    { src: "/assets/photos/reportage-07.jpg", alt: "Репортажный кадр сверху", ratio: 1024 / 1536 },
+    { src: "/assets/photos/reportage-09.jpg", alt: "Живой репортаж за столом", ratio: 1536 / 1024 },
+    { src: "/assets/photos/reportage-05.jpg", alt: "Детали оформления события", ratio: 1536 / 1024 },
+    { src: "/assets/photos/reportage-07.jpg", alt: "Композиционный кадр события", ratio: 1024 / 1536 },
+    { src: "/assets/photos/reportage-04.jpg", alt: "Динамичный репортажный кадр", ratio: 1536 / 1024 },
     { src: "/assets/photos/reportage-08.jpg", alt: "Групповой репортажный портрет", ratio: 1536 / 1024 },
-    { src: "/assets/photos/reportage-09.jpg", alt: "Гости за столом", ratio: 1536 / 1024 },
+    { src: "/assets/photos/reportage-02.jpg", alt: "Репортажный кадр на открытом воздухе", ratio: 1536 / 1024 },
+    { src: "/assets/photos/reportage-03.jpg", alt: "Портрет в пространстве", ratio: 1024 / 1536 },
     { src: "/assets/photos/reportage-10.jpg", alt: "Портрет гостей", ratio: 1536 / 1024 }
   ];
 
@@ -29,7 +29,7 @@
     <div class="section-label">
       <div class="section-number">04</div>
       <h2>ФОТО</h2>
-      <p>РЕПОРТАЖ / ПОРТРЕТ / АТМОСФЕРА</p>
+      <p>РЕПОРТАЖ / СОБЫТИЯ / ЛЮДИ</p>
       <span class="label-rule"></span>
     </div>
     <div class="section-content photo-content">
@@ -112,7 +112,7 @@
   viewer.setAttribute("aria-label", "Просмотр фотографий");
   viewer.innerHTML = `
     <div class="photo-viewer-top">
-      <div class="photo-viewer-title"><strong>ФОТО</strong><span>РЕПОРТАЖ / ПОРТРЕТ / АТМОСФЕРА</span></div>
+      <div class="photo-viewer-title"><strong>ФОТО</strong><span>РЕПОРТАЖ / СОБЫТИЯ / ЛЮДИ</span></div>
       <button class="photo-viewer-close" type="button" aria-label="Закрыть">×</button>
     </div>
     <div class="photo-viewer-stage">
