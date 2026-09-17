@@ -10,6 +10,18 @@
   display: none !important;
 }
 
+/* Let taps on every empty/dimmed area reach #viewer so the existing
+   outside-click handler can close the modal. Interactive regions stay live. */
+.viewer-shell {
+  pointer-events: none;
+}
+
+.viewer-header,
+.viewer-frame,
+.viewer-controls {
+  pointer-events: auto;
+}
+
 .ai-media-frame .ai-native-video {
   position: absolute;
   inset: 0;
@@ -21,6 +33,13 @@
   pointer-events: none;
 }
 
+/* Canonical supplied artwork for the cartoon card. This is independent of
+   Safari's video-poster handling and remains visible until the card is opened. */
+#ai-cartoon-home .ai-cover {
+  z-index: 1;
+  background: #090909 url("/cartoon-cover-v2.jpg") center center / cover no-repeat;
+}
+
 .viewer-frame .ai-native-video {
   width: 100%;
   height: 100%;
@@ -28,4 +47,36 @@
   object-fit: contain;
   background: #000;
   pointer-events: auto;
+}
+
+/* Keep the Behance/marketplace case at the intended portfolio viewing size
+   instead of stretching it to the full 1480px viewer width. */
+.viewer-frame:has(> #ai-ad-player) {
+  width: min(1120px, 100%);
+  margin-inline: auto;
+}
+
+@media (max-width: 900px) {
+  /* The word must fit entirely inside the mobile canvas. */
+  .hero h1 {
+    font-size: clamp(46px, 14.4vw, 64px);
+    line-height: .82;
+    letter-spacing: -.06em;
+  }
+
+  /* Long AI titles should wrap instead of being clipped off-screen. */
+  .viewer-title strong {
+    overflow: visible;
+    font-size: clamp(17px, 5.2vw, 22px);
+    line-height: .94;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
+  /* Mobile reference size: up to 358 × 201, centered. */
+  .viewer-frame:has(> #ai-ad-player) {
+    width: min(358px, calc(100vw - 32px));
+    aspect-ratio: 16 / 9;
+    margin-inline: auto;
+  }
 }
