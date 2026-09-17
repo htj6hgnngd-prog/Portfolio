@@ -42,8 +42,42 @@
     }
   ];
 
-  const grid = document.querySelector(".photo-grid");
-  const cards = Array.from(document.querySelectorAll("[data-photo-index]"));
+  const section = document.getElementById("photo");
+  if (!section) return;
+
+  if (!document.querySelector('link[data-photo-styles]')) {
+    const stylesheet = document.createElement("link");
+    stylesheet.rel = "stylesheet";
+    stylesheet.href = "/photo.css?v=1";
+    stylesheet.dataset.photoStyles = "true";
+    document.head.appendChild(stylesheet);
+  }
+
+  section.classList.remove("is-pending");
+  section.classList.add("photo-section");
+  section.innerHTML = `
+    <div class="section-label">
+      <div class="section-number">04</div>
+      <h2>ФОТО</h2>
+      <p>РЕПОРТАЖ / ПОРТРЕТ / АТМОСФЕРА</p>
+      <span class="label-rule"></span>
+    </div>
+    <div class="section-content photo-content">
+      <button class="photo-hero" type="button" data-photo-index="0" aria-label="Открыть фотографию 1 из 10">
+        <img src="${photos[0].src}" alt="${photos[0].alt}" fetchpriority="high" decoding="async">
+        <span class="photo-hero-mark">РЕПОРТАЖ</span>
+      </button>
+      <div class="photo-grid" aria-label="Фотографии">
+        ${photos.slice(1).map((photo, index) => `
+          <button class="photo-card" type="button" data-photo-index="${index + 1}" aria-label="Открыть фотографию ${index + 2} из ${photos.length}">
+            <img src="${photo.src}" alt="${photo.alt}" loading="lazy" decoding="async">
+          </button>`).join("")}
+      </div>
+    </div>
+  `;
+
+  const grid = section.querySelector(".photo-grid");
+  const cards = Array.from(section.querySelectorAll("[data-photo-index]"));
   if (!grid || !cards.length) return;
 
   const ROW = () => parseFloat(getComputedStyle(grid).getPropertyValue("--photo-row")) || 8;
@@ -165,11 +199,13 @@
     event.stopPropagation();
     shut();
   });
+
   prev.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
     render(active - 1);
   });
+
   next.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
