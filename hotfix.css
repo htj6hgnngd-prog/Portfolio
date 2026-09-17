@@ -1,0 +1,11 @@
+.viewer {
+  display: none !important;
+}
+
+.viewer.is-open {
+  display: grid !important;
+}
+
+.viewer[hidden] {
+  display: none !important;
+}
