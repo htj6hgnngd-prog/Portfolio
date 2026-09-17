@@ -51,3 +51,7 @@
     button.addEventListener("click", () => openEventVideo(button.dataset.eventWork));
   });
 })();
+
+import("/photo-gallery.js?v=1").catch((error) => {
+  console.error("Photo gallery failed to load", error);
+});
