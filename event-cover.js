@@ -4,7 +4,7 @@
     promo2: { video: "/media/promo-2-video", ratio: 0.22 }
   };
 
-  const waitFor = (target, eventName, errorName = "error", timeoutMs = 18000) =>
+  const waitFor = (target, eventName, errorName = "error", timeoutMs = 20000) =>
     new Promise((resolve, reject) => {
       let timer;
       const cleanup = () => {
@@ -28,6 +28,15 @@
       }, timeoutMs);
     });
 
+  const waitForDecodedFrame = (video) =>
+    new Promise((resolve) => {
+      if (typeof video.requestVideoFrameCallback === "function") {
+        video.requestVideoFrameCallback(() => resolve());
+      } else {
+        setTimeout(resolve, 180);
+      }
+    });
+
   async function captureFrame(key) {
     const work = works[key];
     const image = document.querySelector(`[data-event-work="${key}"] .media-frame > img`);
@@ -38,9 +47,11 @@
     video.muted = true;
     video.playsInline = true;
     video.preload = "auto";
+    video.setAttribute("webkit-playsinline", "");
     video.src = work.video;
 
     try {
+      video.load();
       if (video.readyState < 1) await waitFor(video, "loadedmetadata");
 
       const duration = Number.isFinite(video.duration) ? video.duration : 0;
@@ -51,6 +62,7 @@
       const seeked = waitFor(video, "seeked");
       video.currentTime = targetTime;
       await seeked;
+      await waitForDecodedFrame(video);
 
       if (!video.videoWidth || !video.videoHeight) throw new Error("Video dimensions unavailable");
 
@@ -68,8 +80,10 @@
 
       image.src = frame;
       image.dataset.autoFrame = "1";
-    } catch {
-      // Keep the Yandex-generated poster already present in the markup as fallback.
+      image.dataset.coverStatus = "ready";
+    } catch (error) {
+      image.dataset.coverStatus = "fallback";
+      console.warn(`Promo cover ${key} fallback:`, error?.message || error);
     } finally {
       video.pause();
       video.removeAttribute("src");
@@ -78,8 +92,7 @@
   }
 
   const start = async () => {
-    await captureFrame("promo1");
-    await captureFrame("promo2");
+    await Promise.all([captureFrame("promo1"), captureFrame("promo2")]);
   };
 
   const section = document.getElementById("video");
@@ -92,7 +105,7 @@
     if (!entries.some((entry) => entry.isIntersecting)) return;
     instance.disconnect();
     start();
-  }, { rootMargin: "900px 0px" });
+  }, { rootMargin: "1400px 0px" });
 
   observer.observe(section);
 })();
