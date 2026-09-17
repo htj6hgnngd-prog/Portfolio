@@ -17,6 +17,19 @@ const CARTOON_META_API = `https://cloud-api.yandex.net/v1/disk/public/resources?
 const CARTOON_DOWNLOAD_API = `https://cloud-api.yandex.net/v1/disk/public/resources/download?public_key=${encodeURIComponent(CARTOON_PUBLIC_URL)}`;
 const CARTOON_FILE = "/tmp/portfolio-cartoon.mp4";
 
+const EVENT_MEDIA = {
+  promo1: {
+    publicUrl: "https://disk.yandex.ru/i/iIj6z28I2z0d3w",
+    videoPath: "/media/promo-1-video",
+    posterPath: "/media/promo-1-poster"
+  },
+  promo2: {
+    publicUrl: "https://disk.yandex.ru/i/CGJbZxDuh1ORXw",
+    videoPath: "/media/promo-2-video",
+    posterPath: "/media/promo-2-poster"
+  }
+};
+
 const types = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
@@ -40,6 +53,9 @@ let cartoonDownloadExpiresAt = 0;
 let cartoonWarmPromise = null;
 let cartoonReady = false;
 let cartoonSize = 0;
+
+const yandexMetaCache = new Map();
+const yandexDownloadCache = new Map();
 
 function decodeEmbeddedUrl(value) {
   if (!value) return null;
@@ -124,6 +140,51 @@ async function warmAIVideo() {
   } finally {
     aiVideoWarmPromise = null;
   }
+}
+
+async function resolveYandexMeta(publicUrl) {
+  const cached = yandexMetaCache.get(publicUrl);
+  if (cached && Date.now() < cached.expiresAt) return cached.data;
+
+  const api = `https://cloud-api.yandex.net/v1/disk/public/resources?public_key=${encodeURIComponent(publicUrl)}`;
+  const response = await fetch(api, {
+    redirect: "follow",
+    headers: {
+      accept: "application/json",
+      "user-agent": "Mozilla/5.0 PortfolioYandexResolver/1.0"
+    }
+  });
+
+  if (!response.ok) throw new Error(`Yandex metadata returned ${response.status}`);
+  const data = await response.json();
+  const normalized = {
+    preview: data.preview || null,
+    mime: data.mime_type || "video/mp4",
+    size: Number(data.size || 0)
+  };
+  yandexMetaCache.set(publicUrl, { data: normalized, expiresAt: Date.now() + 30 * 60 * 1000 });
+  return normalized;
+}
+
+async function resolveYandexDownload(publicUrl) {
+  const cached = yandexDownloadCache.get(publicUrl);
+  if (cached && Date.now() < cached.expiresAt) return cached.href;
+
+  const api = `https://cloud-api.yandex.net/v1/disk/public/resources/download?public_key=${encodeURIComponent(publicUrl)}`;
+  const response = await fetch(api, {
+    redirect: "follow",
+    headers: {
+      accept: "application/json",
+      "user-agent": "Mozilla/5.0 PortfolioYandexResolver/1.0"
+    }
+  });
+
+  if (!response.ok) throw new Error(`Yandex download API returned ${response.status}`);
+  const data = await response.json();
+  if (!data.href) throw new Error("Yandex download API returned no href");
+
+  yandexDownloadCache.set(publicUrl, { href: data.href, expiresAt: Date.now() + 25 * 60 * 1000 });
+  return data.href;
 }
 
 async function resolveCartoonMeta() {
@@ -343,6 +404,37 @@ const server = http.createServer(async (req, res) => {
         res.end();
       } catch (error) {
         console.error("Cartoon poster resolver error:", error);
+        res.writeHead(404, { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" });
+        res.end("Poster unavailable");
+      }
+      return;
+    }
+
+    const eventMedia = Object.values(EVENT_MEDIA).find(
+      (item) => url.pathname === item.videoPath || url.pathname === item.posterPath
+    );
+
+    if (eventMedia) {
+      if (url.pathname === eventMedia.videoPath) {
+        try {
+          const href = await resolveYandexDownload(eventMedia.publicUrl);
+          res.writeHead(302, { location: href, "cache-control": "no-store" });
+          res.end();
+        } catch (error) {
+          console.error("Event video resolver error:", error);
+          res.writeHead(502, { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" });
+          res.end("Event video unavailable");
+        }
+        return;
+      }
+
+      try {
+        const meta = await resolveYandexMeta(eventMedia.publicUrl);
+        if (!meta.preview) throw new Error("Event preview unavailable");
+        res.writeHead(302, { location: meta.preview, "cache-control": "public, max-age=3600" });
+        res.end();
+      } catch (error) {
+        console.error("Event poster resolver error:", error);
         res.writeHead(404, { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" });
         res.end("Poster unavailable");
       }
