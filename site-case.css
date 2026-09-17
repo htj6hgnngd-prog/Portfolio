@@ -87,9 +87,12 @@
 
 .site-case-screen {
   position: relative;
+  display: block;
+  width: 100%;
   height: clamp(520px, 53vw, 700px);
   overflow: hidden;
   background: #fff;
+  text-decoration: none;
 }
 
 .site-case-capture {
