@@ -10,10 +10,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://i.ytimg.com">
   <link rel="preconnect" href="https://www.youtube-nocookie.com">
-  <link rel="preconnect" href="https://www-ccv.adobe.io" crossorigin>
+  <link rel="preconnect" href="https://adobeprod-a.akamaihd.net" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=6" />
-  <link rel="stylesheet" href="/hotfix.css?v=6" />
+  <link rel="preload" href="/media/ai-poster" as="image">
+  <link rel="stylesheet" href="/styles.css?v=7" />
+  <link rel="stylesheet" href="/hotfix.css?v=7" />
 </head>
 <body>
   <header class="top-navigation">
@@ -60,7 +61,10 @@
       <div class="section-label"><div class="section-number">03</div><h2>ИИ</h2><span class="label-rule"></span></div>
       <div class="section-content">
         <button class="featured-work ai-work" id="ai-featured" type="button" aria-label="Смотреть AI-рекламу">
-          <span class="media-frame ai-media-frame" id="ai-player-home"><iframe id="ai-player" src="https://www-ccv.adobe.io/v1/player/ccv/5-9tzVe57JY/embed?api_key=behance1&bgcolor=%23191919" title="Реклама товара для маркетплейса" tabindex="-1" aria-hidden="true" loading="lazy" allow="autoplay; fullscreen" allowfullscreen></iframe><span class="ai-cover" aria-hidden="true"></span><span class="play-mark"><span>▶</span></span></span>
+          <span class="media-frame ai-media-frame" id="ai-player-home">
+            <video id="ai-player" class="ai-native-video" src="/media/ai-video" poster="/media/ai-poster" preload="auto" muted playsinline webkit-playsinline disablepictureinpicture aria-hidden="true" tabindex="-1"></video>
+            <span class="ai-cover" aria-hidden="true"></span><span class="play-mark"><span>▶</span></span>
+          </span>
           <span class="work-meta"><strong>РЕКЛАМА ТОВАРА ДЛЯ МАРКЕТПЛЕЙСА</strong><span>ИИ-РОЛИК</span></span>
         </button>
       </div>
@@ -93,6 +97,6 @@
     </div>
   </div>
 
-  <script src="/script.js?v=6" defer></script>
+  <script src="/script.js?v=7" defer></script>
 </body>
 </html>
