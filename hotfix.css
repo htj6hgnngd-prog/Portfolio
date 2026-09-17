@@ -4,6 +4,8 @@
 
 .viewer.is-open {
   display: grid !important;
+  overscroll-behavior: none;
+  touch-action: none;
 }
 
 .viewer[hidden] {
@@ -11,13 +13,14 @@
 }
 
 .viewer-shell {
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .viewer-header,
 .viewer-frame,
 .viewer-controls {
   pointer-events: auto;
+  touch-action: auto;
 }
 
 .ai-media-frame .ai-native-video {
@@ -32,18 +35,26 @@
   pointer-events: none;
 }
 
-/* Idle cartoon card: the video layer is fully removed from rendering.
-   The supplied artwork is a normal image element, so Safari cannot cover it. */
+/* Idle cartoon card: remove the video layer and show the supplied cover as
+   a real image. The black container plus the reduced image height reproduces
+   the same cinematic letterbox treatment used by the marketplace video. */
+#ai-cartoon-home {
+  background: #000;
+}
+
 #ai-cartoon-home > .ai-native-video {
   display: none !important;
 }
 
 #ai-cartoon-home > .cartoon-cover-img {
   position: absolute;
-  inset: 0;
+  top: 11%;
+  right: 0;
+  bottom: 11%;
+  left: 0;
   z-index: 2;
   width: 100%;
-  height: 100%;
+  height: 78%;
   display: block;
   object-fit: cover;
   pointer-events: none;
