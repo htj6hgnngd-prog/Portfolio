@@ -1,45 +1,15 @@
 (() => {
   const photos = [
-    {
-      src: "https://d2ol7oe51mr4n9.cloudfront.net/user_3DAx441iE4cBNKdBbYvFbic9eQg/2e2ec536-eb8f-4666-a1d1-ce859d002750.jpg",
-      alt: "Репортажный кадр сверху"
-    },
-    {
-      src: "https://d2ol7oe51mr4n9.cloudfront.net/user_3DAx441iE4cBNKdBbYvFbic9eQg/8be6c358-9737-497d-b206-4bd7fc74d3bd.jpg",
-      alt: "Репортажный кадр на открытом воздухе"
-    },
-    {
-      src: "https://d2ol7oe51mr4n9.cloudfront.net/user_3DAx441iE4cBNKdBbYvFbic9eQg/d53b7bd6-43de-44b2-902c-c072ea815070.jpg",
-      alt: "Портрет"
-    },
-    {
-      src: "https://d2ol7oe51mr4n9.cloudfront.net/user_3DAx441iE4cBNKdBbYvFbic9eQg/d33a9924-d73b-49c0-9a46-760d1e789ac3.jpg",
-      alt: "Динамичный репортажный кадр"
-    },
-    {
-      src: "https://d2ol7oe51mr4n9.cloudfront.net/user_3DAx441iE4cBNKdBbYvFbic9eQg/3ba0cf23-af8d-4104-945c-ee86f063e971.jpg",
-      alt: "Детали оформления"
-    },
-    {
-      src: "https://d2ol7oe51mr4n9.cloudfront.net/user_3DAx441iE4cBNKdBbYvFbic9eQg/fe27b99d-7fb2-432d-99be-1cbfb150847d.jpg",
-      alt: "Гости мероприятия"
-    },
-    {
-      src: "https://d2ol7oe51mr4n9.cloudfront.net/user_3DAx441iE4cBNKdBbYvFbic9eQg/576a2689-0ce1-4069-a459-83ebd661fbe1.jpg",
-      alt: "Репортажный кадр сверху"
-    },
-    {
-      src: "https://d2ol7oe51mr4n9.cloudfront.net/user_3DAx441iE4cBNKdBbYvFbic9eQg/fb91add9-db96-429d-bfd5-a838e468eac1.jpg",
-      alt: "Групповой репортажный портрет"
-    },
-    {
-      src: "https://d2ol7oe51mr4n9.cloudfront.net/user_3DAx441iE4cBNKdBbYvFbic9eQg/0dedbb3b-52ab-47ec-a5fc-1d3e72634ad9.jpg",
-      alt: "Гости за столом"
-    },
-    {
-      src: "https://d2ol7oe51mr4n9.cloudfront.net/user_3DAx441iE4cBNKdBbYvFbic9eQg/eb3db2cc-ebbe-4ccc-a59f-c936db089bc1.jpg",
-      alt: "Портрет гостей"
-    }
+    { src: "/assets/photos/reportage-01.jpg", alt: "Репортажный кадр сверху", ratio: 1418 / 1056 },
+    { src: "/assets/photos/reportage-02.jpg", alt: "Репортажный кадр на открытом воздухе", ratio: 1536 / 1024 },
+    { src: "/assets/photos/reportage-03.jpg", alt: "Портрет", ratio: 1024 / 1536 },
+    { src: "/assets/photos/reportage-04.jpg", alt: "Динамичный репортажный кадр", ratio: 1536 / 1024 },
+    { src: "/assets/photos/reportage-05.jpg", alt: "Детали оформления", ratio: 1536 / 1024 },
+    { src: "/assets/photos/reportage-06.jpg", alt: "Гости мероприятия", ratio: 1536 / 1024 },
+    { src: "/assets/photos/reportage-07.jpg", alt: "Репортажный кадр сверху", ratio: 1024 / 1536 },
+    { src: "/assets/photos/reportage-08.jpg", alt: "Групповой репортажный портрет", ratio: 1536 / 1024 },
+    { src: "/assets/photos/reportage-09.jpg", alt: "Гости за столом", ratio: 1536 / 1024 },
+    { src: "/assets/photos/reportage-10.jpg", alt: "Портрет гостей", ratio: 1536 / 1024 }
   ];
 
   const section = document.getElementById("photo");
@@ -48,7 +18,7 @@
   if (!document.querySelector('link[data-photo-styles]')) {
     const stylesheet = document.createElement("link");
     stylesheet.rel = "stylesheet";
-    stylesheet.href = "/photo.css?v=1";
+    stylesheet.href = "/photo.css?v=3";
     stylesheet.dataset.photoStyles = "true";
     document.head.appendChild(stylesheet);
   }
@@ -65,7 +35,6 @@
     <div class="section-content photo-content">
       <button class="photo-hero" type="button" data-photo-index="0" aria-label="Открыть фотографию 1 из 10">
         <img src="${photos[0].src}" alt="${photos[0].alt}" fetchpriority="high" decoding="async">
-        <span class="photo-hero-mark">РЕПОРТАЖ</span>
       </button>
       <div class="photo-grid" aria-label="Фотографии">
         ${photos.slice(1).map((photo, index) => `
@@ -78,35 +47,60 @@
 
   const grid = section.querySelector(".photo-grid");
   const cards = Array.from(section.querySelectorAll("[data-photo-index]"));
+  const cardsByIndex = new Map(cards.map((card) => [Number(card.dataset.photoIndex), card]));
   if (!grid || !cards.length) return;
 
-  const ROW = () => parseFloat(getComputedStyle(grid).getPropertyValue("--photo-row")) || 8;
-  const GAP = () => parseFloat(getComputedStyle(grid).getPropertyValue("--photo-gap")) || 12;
-
-  function sizeCard(card) {
-    if (card.classList.contains("photo-hero")) return;
-    const img = card.querySelector("img");
-    if (!img?.naturalWidth || !card.clientWidth) return;
-    const targetHeight = card.clientWidth * (img.naturalHeight / img.naturalWidth);
-    const span = Math.ceil((targetHeight + GAP()) / (ROW() + GAP()));
-    card.style.gridRowEnd = `span ${Math.max(1, span)}`;
+  function rowPattern() {
+    return window.innerWidth <= 720
+      ? [[1, 2], [3, 4], [5, 6], [7, 8], [9]]
+      : [[1, 2], [3, 4], [5, 6, 7], [8, 9]];
   }
 
-  function layout() {
-    cards.forEach(sizeCard);
-  }
+  function layoutGallery() {
+    const width = grid.clientWidth;
+    if (!width) return;
 
-  cards.forEach((card) => {
-    const img = card.querySelector("img");
-    if (!img) return;
-    if (img.complete) sizeCard(card);
-    else img.addEventListener("load", () => sizeCard(card), { once: true });
-  });
+    const style = getComputedStyle(grid);
+    const gap = parseFloat(style.getPropertyValue("--photo-gap")) || (window.innerWidth <= 900 ? 7 : 12);
+    const fragment = document.createDocumentFragment();
+
+    rowPattern().forEach((indexes) => {
+      const row = document.createElement("div");
+      row.className = "photo-row";
+
+      const usableWidth = width - gap * (indexes.length - 1);
+      const ratioSum = indexes.reduce((sum, index) => sum + photos[index].ratio, 0);
+      const rowHeight = usableWidth / ratioSum;
+      row.style.height = `${rowHeight}px`;
+
+      let consumed = 0;
+      indexes.forEach((index, position) => {
+        const card = cardsByIndex.get(index);
+        if (!card) return;
+
+        let cardWidth;
+        if (position === indexes.length - 1) {
+          cardWidth = usableWidth - consumed;
+        } else {
+          cardWidth = rowHeight * photos[index].ratio;
+          consumed += cardWidth;
+        }
+
+        card.style.width = `${cardWidth}px`;
+        card.style.height = `${rowHeight}px`;
+        row.appendChild(card);
+      });
+
+      fragment.appendChild(row);
+    });
+
+    grid.replaceChildren(fragment);
+  }
 
   let resizeTimer;
   window.addEventListener("resize", () => {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(layout, 80);
+    resizeTimer = setTimeout(layoutGallery, 90);
   });
 
   const viewer = document.createElement("div");
@@ -242,5 +236,5 @@
     if (event.key === "ArrowRight") render(active + 1);
   });
 
-  requestAnimationFrame(layout);
+  requestAnimationFrame(layoutGallery);
 })();
