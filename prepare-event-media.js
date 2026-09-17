@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import { createWriteStream } from "node:fs";
-import { stat } from "node:fs/promises";
+import { rename, stat } from "node:fs/promises";
 import { pipeline } from "node:stream/promises";
 import { Readable } from "node:stream";
 import path from "node:path";
@@ -38,8 +38,21 @@ function runFFmpeg(args, label) {
     });
     child.on("error", reject);
     child.on("exit", (code, signal) => {
-      if (code === 0) return resolve();
+      if (code === 0) return resolve(errorText);
       reject(new Error(`${label} failed (code=${code}, signal=${signal || "none"}): ${errorText.slice(-3000)}`));
+    });
+  });
+}
+
+function probeVideoCodec(file) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(ffmpegPath, ["-hide_banner", "-i", file], { stdio: ["ignore", "ignore", "pipe"] });
+    let text = "";
+    child.stderr.on("data", (chunk) => { text += chunk.toString(); });
+    child.on("error", reject);
+    child.on("exit", () => {
+      const match = text.match(/Video:\s*([^,\s]+)/i);
+      resolve(match?.[1]?.toLowerCase() || "unknown");
     });
   });
 }
@@ -50,7 +63,7 @@ async function resolveMetadata(publicUrl) {
     redirect: "follow",
     headers: {
       accept: "application/json",
-      "user-agent": "Mozilla/5.0 PortfolioEventMediaBuilder/3.0"
+      "user-agent": "Mozilla/5.0 PortfolioEventMediaBuilder/4.0"
     }
   });
   if (!response.ok) throw new Error(`Yandex metadata ${response.status}`);
@@ -62,7 +75,7 @@ async function resolveMetadata(publicUrl) {
 async function downloadFile(url, output) {
   const response = await fetch(url, {
     redirect: "follow",
-    headers: { "user-agent": "Mozilla/5.0 PortfolioEventMediaBuilder/3.0" }
+    headers: { "user-agent": "Mozilla/5.0 PortfolioEventMediaBuilder/4.0" }
   });
   if (!response.ok || !response.body) throw new Error(`event source download ${response.status}`);
   await pipeline(Readable.fromWeb(response.body), createWriteStream(output));
@@ -78,21 +91,38 @@ for (const item of items) {
   console.log(`${item.name} cached source: ${(sourceInfo.size / 1024 / 1024).toFixed(1)} MB`);
 
   await runFFmpeg([
-    "-y",
-    "-hide_banner",
-    "-loglevel", "error",
+    "-y", "-hide_banner", "-loglevel", "error",
     "-i", item.source,
-    "-map", "0:v:0",
-    "-map", "0:a?",
+    "-map", "0:v:0", "-map", "0:a?",
     "-c", "copy",
     "-movflags", "+faststart",
     item.video
   ], `${item.name} remux`);
 
+  let codec = await probeVideoCodec(item.video);
+  if (codec !== "h264" && codec !== "avc1") {
+    const converted = `${item.video}.h264.mp4`;
+    console.log(`${item.name}: codec ${codec}, converting to browser-safe H.264`);
+    await runFFmpeg([
+      "-y", "-hide_banner", "-loglevel", "error",
+      "-i", item.source,
+      "-map", "0:v:0", "-map", "0:a?",
+      "-c:v", "libx264", "-preset", "ultrafast", "-crf", "22", "-threads", "1",
+      "-pix_fmt", "yuv420p",
+      "-c:a", "aac", "-b:a", "160k",
+      "-movflags", "+faststart",
+      converted
+    ], `${item.name} compatibility transcode`);
+    await rename(converted, item.video);
+    codec = await probeVideoCodec(item.video);
+  }
+
+  if (codec !== "h264" && codec !== "avc1") {
+    throw new Error(`${item.name}: unsupported output codec ${codec}`);
+  }
+
   await runFFmpeg([
-    "-y",
-    "-hide_banner",
-    "-loglevel", "error",
+    "-y", "-hide_banner", "-loglevel", "error",
     "-ss", item.coverTime,
     "-i", item.source,
     "-frames:v", "1",
@@ -106,5 +136,5 @@ for (const item of items) {
   if (videoInfo.size < 100000 || coverInfo.size < 5000) {
     throw new Error(`${item.name} output verification failed: video=${videoInfo.size}, cover=${coverInfo.size}`);
   }
-  console.log(`${item.name} ready: local MP4 ${(videoInfo.size / 1024 / 1024).toFixed(1)} MB, cover ${(coverInfo.size / 1024).toFixed(0)} KB`);
+  console.log(`${item.name} ready: ${codec} MP4 ${(videoInfo.size / 1024 / 1024).toFixed(1)} MB, cover ${(coverInfo.size / 1024).toFixed(0)} KB`);
 }
