@@ -15,16 +15,22 @@
     <div class="section-content product-demo-wrap">
       <div class="product-demo-head">
         <div class="product-demo-head-copy">
-          <span>DIRECT AI</span>
-          <h3>AI-АГЕНТ ДЛЯ СОЗДАНИЯ, ПРОВЕРКИ И УПРАВЛЕНИЯ РЕКЛАМОЙ В ЯНДЕКС ДИРЕКТЕ.</h3>
+          <span>DIRECT AI / PRODUCT CASE</span>
+          <h3>НЕ ЕЩЁ ОДИН ДАШБОРД.</h3>
+          <p>Рекламный кабинет показывает, что произошло.<br><strong>Direct AI помогает понять, что делать дальше.</strong></p>
         </div>
-        <div class="product-demo-sequence" aria-label="Сценарий демонстрации">
-          <span data-step="agent" class="is-active">01</span>
-          <span data-step="review">02</span>
-          <span data-step="dashboard">03</span>
-          <span data-step="campaigns">04</span>
-          <span data-step="menu">05</span>
+        <div class="product-demo-sequence" aria-label="Логика продукта">
+          <span data-step="agent" class="is-active"><b>01</b><em>ЗАДАЧА</em></span>
+          <span data-step="review"><b>02</b><em>АНАЛИЗ</em></span>
+          <span data-step="dashboard"><b>03</b><em>ВЫВОД</em></span>
+          <span data-step="campaigns"><b>04</b><em>КОНТРОЛЬ</em></span>
+          <span data-step="menu"><b>05</b><em>СИСТЕМА</em></span>
         </div>
+      </div>
+
+      <div class="product-demo-story" aria-live="polite">
+        <span class="product-demo-story-kicker">01 / ЗАДАЧА</span>
+        <strong class="product-demo-story-title">СТАВИШЬ ЗАДАЧУ ОБЫЧНЫМ ЯЗЫКОМ.</strong>
       </div>
 
       <div class="dai-demo-frame" aria-label="Автоматическая демонстрация реального интерфейса Direct AI">
@@ -174,11 +180,17 @@
 
           <span class="dai-cursor" aria-hidden="true"></span>
         </div>
+
+        <div class="product-value-overlay" aria-hidden="true">
+          <span>DIRECT AI</span>
+          <strong>ДАННЫЕ → АНАЛИЗ → РЕШЕНИЕ → ДЕЙСТВИЕ</strong>
+          <p>AI-агент для работы с рекламой в Яндекс Директе.</p>
+        </div>
       </div>
 
       <div class="product-demo-caption">
         <strong>DIRECT AI</strong>
-        <span>АГЕНТ → ПРОВЕРКА → СВОДКА → КАМПАНИИ → ИНСТРУМЕНТЫ</span>
+        <span>PRODUCT / UX / FRONTEND / BACKEND / AI / YANDEX DIRECT API</span>
       </div>
     </div>
   `;
@@ -192,7 +204,20 @@
   const scenes = [...section.querySelectorAll("[data-scene]")];
   const navItems = [...section.querySelectorAll("[data-demo-nav]")];
   const steps = [...section.querySelectorAll("[data-step]")];
-  if (!frame || !canvas || !cursor || !reviewState || !reviewPrompt || !menuLayer) return;
+  const story = section.querySelector(".product-demo-story");
+  const storyKicker = section.querySelector(".product-demo-story-kicker");
+  const storyTitle = section.querySelector(".product-demo-story-title");
+  const valueOverlay = section.querySelector(".product-value-overlay");
+  if (!frame || !canvas || !cursor || !reviewState || !reviewPrompt || !menuLayer || !story || !storyKicker || !storyTitle || !valueOverlay) return;
+
+  const storyCopy = {
+    agent: ["01 / ЗАДАЧА", "СТАВИШЬ ЗАДАЧУ ОБЫЧНЫМ ЯЗЫКОМ."],
+    review: ["02 / АНАЛИЗ", "АГЕНТ СРАВНИВАЕТ ПЕРИОДЫ, ИЩЕТ ОТКЛОНЕНИЯ И ПРОВЕРЯЕТ ПРИЧИНЫ."],
+    dashboard: ["03 / ВЫВОД", "НЕ ПРОСТО МЕТРИКИ — ТОЛЬКО ВЫВОДЫ, КОТОРЫЕ МОЖНО ПРОВЕРИТЬ."],
+    campaigns: ["04 / КОНТРОЛЬ", "КАМПАНИИ И СОСТОЯНИЕ КАБИНЕТА — В ОДНОМ РАБОЧЕМ ПРОСТРАНСТВЕ."],
+    menu: ["05 / СИСТЕМА", "РЕШЕНИЯ, ПОИСКОВЫЕ ЗАПРОСЫ, ИСТОРИЯ АНАЛИЗОВ, ЛИДЫ И ПРОДАЖИ."],
+    summary: ["DIRECT AI", "ДАННЫЕ → АНАЛИЗ → РЕШЕНИЕ → ДЕЙСТВИЕ"]
+  };
 
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let visible = false;
@@ -210,8 +235,19 @@
   resizeObserver.observe(frame);
   resizeDemo();
 
+  function setStory(name) {
+    const copy = storyCopy[name];
+    if (!copy) return;
+    story.classList.remove("is-changing");
+    void story.offsetWidth;
+    storyKicker.textContent = copy[0];
+    storyTitle.textContent = copy[1];
+    story.classList.add("is-changing");
+  }
+
   function setStep(name) {
     steps.forEach((item) => item.classList.toggle("is-active", item.dataset.step === name));
+    setStory(name);
   }
 
   function setScene(name) {
@@ -225,6 +261,7 @@
     reviewPrompt.classList.remove("is-targeted");
     reviewState.classList.remove("is-visible");
     menuLayer.classList.remove("is-open");
+    valueOverlay.classList.remove("is-visible");
     cursor.classList.remove("is-visible", "is-clicking");
   }
 
@@ -306,11 +343,18 @@
       if (!(await wait(250, token))) return;
       menuLayer.classList.add("is-open");
       setStep("menu");
-      if (!(await wait(3000, token))) return;
+      if (!(await wait(2700, token))) return;
 
       menuLayer.classList.remove("is-open");
       cursor.classList.remove("is-visible");
-      if (!(await wait(850, token))) return;
+      if (!(await wait(500, token))) return;
+
+      steps.forEach((item) => item.classList.remove("is-active"));
+      setStory("summary");
+      valueOverlay.classList.add("is-visible");
+      if (!(await wait(2600, token))) return;
+      valueOverlay.classList.remove("is-visible");
+      if (!(await wait(650, token))) return;
     }
   }
 
