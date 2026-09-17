@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f5f2e9" />
+  <meta name="description" content="Портфолио: YouTube, видео, AI, фото, продукт и веб." />
+  <title>Портфолио</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="top-navigation">
+    <nav class="nav-grid" aria-label="Разделы портфолио">
+      <button class="is-active" data-target="youtube">ЮТУБ</button>
+      <button data-target="video">ВИДЕО</button>
+      <button data-target="ai">ИИ</button>
+      <button data-target="photo">ФОТО</button>
+      <button data-target="product">ПРОДУКТ</button>
+      <button data-target="site">САЙТ</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="portfolio-title">
+      <h1 id="portfolio-title">ПОРТФОЛИО</h1>
+    </section>
+
+    <section id="youtube" class="portfolio-section">
+      <div class="section-label">
+        <div class="section-number">01</div>
+        <h2>ЮТУБ</h2>
+        <span class="label-rule"></span>
+      </div>
+      <div class="section-content">
+        <button class="featured-work" id="youtube-featured" type="button" aria-label="Смотреть выбранное видео">
+          <span class="media-frame"><img id="featured-image" src="https://i.ytimg.com/vi/pPTTScpvxMA/maxresdefault.jpg" alt=""><span class="play-mark"><span>▶</span></span></span>
+          <span class="work-meta"><strong id="featured-title">НИЖНИЙ НОВГОРОД</strong><span id="featured-role">ПОЛНАЯ СЪЁМКА</span></span>
+        </button>
+        <div class="work-strip" aria-label="Работы для YouTube">
+          <button class="work-thumb is-selected" type="button" data-video="0"><span class="thumb-image"><img src="https://i.ytimg.com/vi/pPTTScpvxMA/maxresdefault.jpg" alt=""><span class="play-mark play-mark--small"><span>▶</span></span></span><span class="thumb-copy"><strong>НИЖНИЙ НОВГОРОД</strong><span>ПОЛНАЯ СЪЁМКА</span></span></button>
+          <button class="work-thumb" type="button" data-video="1"><span class="thumb-image"><img src="https://i.ytimg.com/vi/RBRXIkmQUJI/maxresdefault.jpg" alt=""><span class="play-mark play-mark--small"><span>▶</span></span></span><span class="thumb-copy"><strong>ТАТАРСТАН</strong><span>ПОЛНАЯ СЪЁМКА</span></span></button>
+          <button class="work-thumb" type="button" data-video="2"><span class="thumb-image"><img src="https://i.ytimg.com/vi/FhwHKvgYwGo/maxresdefault.jpg" alt=""><span class="play-mark play-mark--small"><span>▶</span></span></span><span class="thumb-copy"><strong>МАРКЕТПЛЕЙСЫ</strong><span>СЪЁМКА БОЛЬШЕЙ ЧАСТИ ИНТЕРВЬЮ</span></span></button>
+        </div>
+      </div>
+    </section>
+
+    <section id="video" class="portfolio-section is-pending">
+      <div class="section-label"><div class="section-number">02</div><h2>ВИДЕО</h2><span class="label-rule"></span></div>
+      <div class="section-content"><div class="pending-panel"><span>МАТЕРИАЛЫ ПОЗЖЕ</span></div></div>
+    </section>
+
+    <section id="ai" class="portfolio-section">
+      <div class="section-label"><div class="section-number">03</div><h2>ИИ</h2><span class="label-rule"></span></div>
+      <div class="section-content">
+        <button class="featured-work ai-work" id="ai-featured" type="button" aria-label="Смотреть AI-рекламу">
+          <span class="media-frame ai-media-frame"><iframe src="https://www-ccv.adobe.io/v1/player/ccv/5-9tzVe57JY/embed?api_key=behance1&bgcolor=%23191919" title="Реклама товара для маркетплейса" tabindex="-1" aria-hidden="true"></iframe><span class="ai-cover" aria-hidden="true"></span><span class="play-mark"><span>▶</span></span></span>
+          <span class="work-meta"><strong>РЕКЛАМА ТОВАРА ДЛЯ МАРКЕТПЛЕЙСА</strong><span>ИИ-РОЛИК</span></span>
+        </button>
+      </div>
+    </section>
+
+    <section id="photo" class="portfolio-section is-pending">
+      <div class="section-label"><div class="section-number">04</div><h2>ФОТО</h2><span class="label-rule"></span></div>
+      <div class="section-content"><div class="pending-panel"><span>МАТЕРИАЛЫ ПОЗЖЕ</span></div></div>
+    </section>
+
+    <section id="product" class="portfolio-section is-pending">
+      <div class="section-label"><div class="section-number">05</div><h2>РАЗРАБОТКА ПРОДУКТА</h2><p>ДИРЕКТ ИИ</p><span class="label-rule"></span></div>
+      <div class="section-content"><div class="pending-panel"><span>МАТЕРИАЛЫ ПОЗЖЕ</span></div></div>
+    </section>
+
+    <section id="site" class="portfolio-section is-pending">
+      <div class="section-label"><div class="section-number">06</div><h2>САЙТ</h2><span class="label-rule"></span></div>
+      <div class="section-content"><div class="pending-panel"><span>МАТЕРИАЛЫ ПОЗЖЕ</span></div></div>
+    </section>
+  </main>
+
+  <div class="viewer" id="viewer" hidden role="dialog" aria-modal="true" aria-label="Просмотр видео">
+    <div class="viewer-shell">
+      <div class="viewer-header">
+        <div class="viewer-title"><strong id="viewer-title"></strong><span id="viewer-role"></span></div>
+        <div class="viewer-actions"><a id="viewer-source" class="viewer-link" target="_blank" rel="noreferrer">ИСТОЧНИК ↗</a><button id="viewer-close" class="icon-button" type="button" aria-label="Закрыть">×</button></div>
+      </div>
+      <div class="viewer-frame" id="viewer-frame"></div>
+      <div class="viewer-controls" id="viewer-controls"><button class="icon-button" id="viewer-prev" type="button" aria-label="Предыдущее видео">←</button><span id="viewer-count">01 / 03</span><button class="icon-button" id="viewer-next" type="button" aria-label="Следующее видео">→</button></div>
+    </div>
+  </div>
+
+  <script src="/script.js" defer></script>
+</body>
+</html>
