@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node verify-cover.js && node server-proxy.js"
+    "start": "node verify-cover.js && node prepare-event-covers.js && node server-proxy.js"
   },
   "engines": {
     "node": ">=20"
