@@ -64,7 +64,7 @@
         <button class="featured-work ai-work ai-work--primary" id="ai-cartoon-featured" type="button" data-ai-work="cartoon" aria-label="Смотреть мультфильм">
           <span class="media-frame ai-media-frame" id="ai-cartoon-home">
             <video id="ai-cartoon-player" class="ai-native-video" src="/media/cartoon-video" preload="metadata" muted playsinline webkit-playsinline disablepictureinpicture aria-hidden="true" tabindex="-1"></video>
-            <img class="cartoon-cover-img" src="/cartoon-cover-768.svg?v=1" alt="" fetchpriority="high" decoding="async">
+            <img id="cartoon-cover-img" class="cartoon-cover-img" alt="" fetchpriority="high" decoding="async">
             <span class="play-mark"><span>▶</span></span>
           </span>
           <span class="work-meta"><strong>МУЛЬТФИЛЬМ</strong><span>ПОЛНЫЙ АВТОРСКИЙ ЦИКЛ</span></span>
@@ -109,6 +109,7 @@
     </div>
   </div>
 
+  <script src="/cover-loader.js?v=1" defer></script>
   <script src="/script.js?v=8" defer></script>
 </body>
 </html>
