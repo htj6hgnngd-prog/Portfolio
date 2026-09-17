@@ -19,6 +19,8 @@ const types = {
 
 let aiMediaCache = null;
 let aiMediaCacheExpiresAt = 0;
+let aiVideoBuffer = null;
+let aiVideoWarmPromise = null;
 
 function decodeEmbeddedUrl(value) {
   if (!value) return null;
@@ -80,27 +82,102 @@ async function resolveAIMedia() {
   return aiMediaCache;
 }
 
+async function warmAIVideo() {
+  if (aiVideoBuffer) return aiVideoBuffer;
+  if (aiVideoWarmPromise) return aiVideoWarmPromise;
+
+  aiVideoWarmPromise = (async () => {
+    const media = await resolveAIMedia();
+    const response = await fetch(media.mp4, {
+      redirect: "follow",
+      headers: { "user-agent": "Mozilla/5.0 PortfolioMediaCache/1.0" }
+    });
+
+    if (!response.ok) throw new Error(`Direct MP4 returned ${response.status}`);
+    const arrayBuffer = await response.arrayBuffer();
+    aiVideoBuffer = Buffer.from(arrayBuffer);
+    console.log(`AI video cached in memory: ${(aiVideoBuffer.length / 1024 / 1024).toFixed(2)} MB`);
+    return aiVideoBuffer;
+  })();
+
+  try {
+    return await aiVideoWarmPromise;
+  } finally {
+    aiVideoWarmPromise = null;
+  }
+}
+
+function serveBufferedVideo(req, res, buffer) {
+  const total = buffer.length;
+  const range = req.headers.range;
+  const common = {
+    "content-type": "video/mp4",
+    "accept-ranges": "bytes",
+    "cache-control": "public, max-age=86400, immutable"
+  };
+
+  if (!range) {
+    res.writeHead(200, { ...common, "content-length": total });
+    if (req.method === "HEAD") return res.end();
+    return res.end(buffer);
+  }
+
+  const match = /^bytes=(\d*)-(\d*)$/.exec(range);
+  if (!match) {
+    res.writeHead(416, { "content-range": `bytes */${total}` });
+    return res.end();
+  }
+
+  const start = match[1] ? Number(match[1]) : 0;
+  const end = match[2] ? Math.min(Number(match[2]), total - 1) : total - 1;
+
+  if (!Number.isFinite(start) || !Number.isFinite(end) || start < 0 || start > end || start >= total) {
+    res.writeHead(416, { "content-range": `bytes */${total}` });
+    return res.end();
+  }
+
+  const chunk = buffer.subarray(start, end + 1);
+  res.writeHead(206, {
+    ...common,
+    "content-range": `bytes ${start}-${end}/${total}`,
+    "content-length": chunk.length
+  });
+  if (req.method === "HEAD") return res.end();
+  return res.end(chunk);
+}
+
 const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host}`);
 
-    if (url.pathname === "/media/ai-video" || url.pathname === "/media/ai-poster") {
+    if (url.pathname === "/media/ai-video") {
+      try {
+        const buffer = await warmAIVideo();
+        serveBufferedVideo(req, res, buffer);
+      } catch (error) {
+        console.error("AI video cache error:", error);
+        try {
+          const media = await resolveAIMedia();
+          res.writeHead(302, { location: media.mp4, "cache-control": "no-store" });
+          res.end();
+        } catch {
+          res.writeHead(502, { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" });
+          res.end("AI video unavailable");
+        }
+      }
+      return;
+    }
+
+    if (url.pathname === "/media/ai-poster") {
       try {
         const media = await resolveAIMedia();
-        const target = url.pathname === "/media/ai-video" ? media.mp4 : media.poster;
-        if (!target) throw new Error("Requested media URL unavailable");
-        res.writeHead(302, {
-          location: target,
-          "cache-control": "no-store, max-age=0"
-        });
+        if (!media.poster) throw new Error("Poster unavailable");
+        res.writeHead(302, { location: media.poster, "cache-control": "public, max-age=3600" });
         res.end();
       } catch (error) {
-        console.error("AI media resolver error:", error);
-        res.writeHead(502, {
-          "content-type": "text/plain; charset=utf-8",
-          "cache-control": "no-store"
-        });
-        res.end("AI media unavailable");
+        console.error("AI poster resolver error:", error);
+        res.writeHead(404, { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" });
+        res.end("Poster unavailable");
       }
       return;
     }
@@ -131,4 +208,5 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(port, "0.0.0.0", () => {
   console.log(`Portfolio listening on ${port}`);
+  warmAIVideo().catch((error) => console.error("AI video startup warmup failed:", error));
 });
