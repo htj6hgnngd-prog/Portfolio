@@ -4,21 +4,37 @@ const works = [
   { id: "FhwHKvgYwGo", title: "МАРКЕТПЛЕЙСЫ", fullTitle: "ПОЧЕМУ МАРКЕТПЛЕЙСЫ НЕ БИЗНЕС И КТО НА НИХ ЗАРАБАТЫВАЕТ?", role: "СЪЁМКА БОЛЬШЕЙ ЧАСТИ ИНТЕРВЬЮ", image: "https://i.ytimg.com/vi/FhwHKvgYwGo/maxresdefault.jpg" }
 ];
 
-const ai = {
-  title: "РЕКЛАМА ТОВАРА ДЛЯ МАРКЕТПЛЕЙСА",
-  role: "ИИ-РОЛИК",
-  behance: "https://www.behance.net/gallery/230138193/Veo-3-AI-Ads"
+const aiWorks = {
+  cartoon: {
+    title: "МУЛЬТФИЛЬМ",
+    role: "ПОЛНЫЙ АВТОРСКИЙ ЦИКЛ",
+    sourceLabel: "ЯНДЕКС ДИСК ↗",
+    source: "https://disk.yandex.ru/i/Q6JaTkvI-IB1tw",
+    playerId: "ai-cartoon-player",
+    homeId: "ai-cartoon-home"
+  },
+  ad: {
+    title: "РЕКЛАМА ТОВАРА ДЛЯ МАРКЕТПЛЕЙСА",
+    role: "ПОЛНЫЙ АВТОРСКИЙ ЦИКЛ",
+    sourceLabel: "БЕХАНС ↗",
+    source: "https://www.behance.net/gallery/230138193/Veo-3-AI-Ads",
+    playerId: "ai-ad-player",
+    homeId: "ai-ad-home"
+  }
 };
 
 let activeVideo = 0;
 let viewerType = null;
+let activeAIKey = null;
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 
-function restoreAIPlayer() {
-  const player = $("#ai-player");
-  const home = $("#ai-player-home");
+function restoreAIPlayer(key = activeAIKey) {
+  if (!key || !aiWorks[key]) return;
+  const work = aiWorks[key];
+  const player = document.getElementById(work.playerId);
+  const home = document.getElementById(work.homeId);
   if (!player || !home) return;
 
   player.pause();
@@ -32,7 +48,7 @@ function restoreAIPlayer() {
   try {
     if (player.readyState > 0) player.currentTime = 0;
   } catch {
-    // Some mobile browsers can briefly reject seeks while metadata is changing.
+    // Mobile browsers can reject a seek while metadata is changing.
   }
 }
 
@@ -40,7 +56,7 @@ function resetViewer() {
   const viewer = $("#viewer");
   if (!viewer) return;
 
-  restoreAIPlayer();
+  if (activeAIKey) restoreAIPlayer(activeAIKey);
 
   const frame = $("#viewer-frame");
   if (frame) frame.replaceChildren();
@@ -50,6 +66,7 @@ function resetViewer() {
   viewer.setAttribute("aria-hidden", "true");
   document.body.classList.remove("modal-open");
   viewerType = null;
+  activeAIKey = null;
 }
 
 function updateFeatured(index) {
@@ -65,6 +82,7 @@ function renderYoutube(index) {
   updateFeatured(index);
   const work = works[index];
   viewerType = "youtube";
+  activeAIKey = null;
 
   $("#viewer-title").textContent = work.title;
   $("#viewer-role").textContent = work.role;
@@ -77,16 +95,22 @@ function renderYoutube(index) {
   openViewer();
 }
 
-function renderAI() {
-  const player = $("#ai-player");
+function renderAI(key) {
+  const work = aiWorks[key];
+  if (!work) return;
+
+  const player = document.getElementById(work.playerId);
   const frame = $("#viewer-frame");
   if (!player || !frame) return;
 
+  if (activeAIKey && activeAIKey !== key) restoreAIPlayer(activeAIKey);
+
   viewerType = "ai";
-  $("#viewer-title").textContent = ai.title;
-  $("#viewer-role").textContent = ai.role;
-  $("#viewer-source").textContent = "БЕХАНС ↗";
-  $("#viewer-source").href = ai.behance;
+  activeAIKey = key;
+  $("#viewer-title").textContent = work.title;
+  $("#viewer-role").textContent = work.role;
+  $("#viewer-source").textContent = work.sourceLabel;
+  $("#viewer-source").href = work.source;
   $("#viewer-controls").hidden = true;
 
   player.controls = true;
@@ -119,8 +143,10 @@ function moveVideo(direction) {
   renderYoutube((activeVideo + direction + works.length) % works.length);
 }
 
-function prewarmAI() {
-  const player = $("#ai-player");
+function prewarmAI(key) {
+  const work = aiWorks[key];
+  if (!work) return;
+  const player = document.getElementById(work.playerId);
   if (!player || player.dataset.prewarmed === "1") return;
   player.dataset.prewarmed = "1";
   player.preload = "auto";
@@ -129,7 +155,7 @@ function prewarmAI() {
 
 $("#youtube-featured").addEventListener("click", () => renderYoutube(activeVideo));
 $$(".work-thumb").forEach((el, index) => el.addEventListener("click", () => renderYoutube(index)));
-$("#ai-featured").addEventListener("click", renderAI);
+$$('[data-ai-work]').forEach((el) => el.addEventListener("click", () => renderAI(el.dataset.aiWork)));
 $("#viewer-close").addEventListener("click", closeViewer);
 $("#viewer-prev").addEventListener("click", () => moveVideo(-1));
 $("#viewer-next").addEventListener("click", () => moveVideo(1));
@@ -161,7 +187,8 @@ const aiSection = $("#ai");
 if (aiSection && "IntersectionObserver" in window) {
   const observer = new IntersectionObserver((entries, instance) => {
     if (entries.some((entry) => entry.isIntersecting)) {
-      prewarmAI();
+      prewarmAI("cartoon");
+      prewarmAI("ad");
       instance.disconnect();
     }
   }, { rootMargin: "1800px 0px" });
@@ -169,7 +196,10 @@ if (aiSection && "IntersectionObserver" in window) {
 }
 
 window.addEventListener("load", () => {
-  if (!navigator.connection?.saveData) setTimeout(prewarmAI, 120);
+  if (!navigator.connection?.saveData) {
+    setTimeout(() => prewarmAI("cartoon"), 80);
+    setTimeout(() => prewarmAI("ad"), 180);
+  }
 }, { once: true });
 
 window.addEventListener("scroll", updateNav, { passive: true });
