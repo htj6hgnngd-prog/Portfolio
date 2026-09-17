@@ -10,7 +10,6 @@
   display: none !important;
 }
 
-/* Empty/dimmed modal area closes the viewer; controls remain interactive. */
 .viewer-shell {
   pointer-events: none;
 }
@@ -33,13 +32,20 @@
   pointer-events: none;
 }
 
-/* Keep the supplied cover above the idle video. The actual image is defined
-   in cover.css; do not override background-image here. */
-#ai-cartoon-home .ai-cover {
+/* Idle cartoon card: the video layer is fully removed from rendering.
+   The supplied artwork is a normal image element, so Safari cannot cover it. */
+#ai-cartoon-home > .ai-native-video {
+  display: none !important;
+}
+
+#ai-cartoon-home > .cartoon-cover-img {
+  position: absolute;
+  inset: 0;
   z-index: 2;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
   pointer-events: none;
 }
 
@@ -47,17 +53,18 @@
   z-index: 3;
 }
 
-.viewer-frame .ai-native-video {
+.viewer-frame .ai-native-video,
+.viewer-frame > #ai-cartoon-player {
   position: static;
+  z-index: auto;
   width: 100%;
   height: 100%;
-  display: block;
+  display: block !important;
   object-fit: contain;
   background: #000;
   pointer-events: auto;
 }
 
-/* Behance/marketplace player: controlled portfolio viewing size. */
 .viewer-frame:has(> #ai-ad-player) {
   width: min(1120px, 100%);
   margin-inline: auto;
