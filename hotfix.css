@@ -64,14 +64,24 @@
   z-index: 3;
 }
 
+.viewer-frame {
+  position: relative;
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+
 .viewer-frame .ai-native-video,
-.viewer-frame > #ai-cartoon-player {
-  position: static;
-  z-index: auto;
-  width: 100%;
-  height: 100%;
+.viewer-frame > #ai-cartoon-player,
+.viewer-frame > .event-viewer-video {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 1;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
   display: block !important;
-  object-fit: contain;
+  object-fit: contain !important;
   background: #000;
   pointer-events: auto;
 }
@@ -94,6 +104,12 @@
     line-height: .94;
     text-overflow: clip;
     white-space: normal;
+  }
+
+  .viewer-frame {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    min-height: 0;
   }
 
   .viewer-frame:has(> #ai-ad-player) {
