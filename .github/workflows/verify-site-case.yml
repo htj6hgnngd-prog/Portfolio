@@ -1,5 +1,5 @@
 name: Verify production site case
-# rerun after autoplay visibility fix
+# rerun after viewport sizing fix
 
 on:
   push:
@@ -56,7 +56,9 @@ jobs:
                 scrollWidth: document.documentElement.scrollWidth,
                 viewportWidth: window.innerWidth,
                 screenWidth: site.querySelector('.site-case-screen')?.getBoundingClientRect().width,
+                screenHeight: site.querySelector('.site-case-screen')?.getBoundingClientRect().height,
                 imageWidth: img?.getBoundingClientRect().width,
+                imageHeight: img?.getBoundingClientRect().height,
                 transform: getComputedStyle(img).transform
               };
             });
@@ -70,6 +72,8 @@ jobs:
             assert.equal(basics.fakeDemoBlocks, 0, `${name}: recreated/fake site blocks still exist`);
             assert.ok(basics.liveHref.startsWith('https://denisovphoto.ru/'), `${name}: live link is wrong`);
             assert.ok(basics.scrollWidth <= basics.viewportWidth + 2, `${name}: horizontal page overflow ${basics.scrollWidth}/${basics.viewportWidth}`);
+            assert.ok(basics.screenHeight > 300, `${name}: preview viewport collapsed (${basics.screenHeight}px)`);
+            assert.ok(basics.imageHeight > basics.screenHeight + 500, `${name}: real-site capture has no vertical travel`);
             assert.ok(Math.abs(basics.screenWidth - basics.imageWidth) <= 2, `${name}: captured site is not fitted proportionally inside browser frame`);
 
             const transformBefore = await page.locator('.site-case-capture').evaluate(el => getComputedStyle(el).transform);
