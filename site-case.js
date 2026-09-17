@@ -120,16 +120,16 @@
   const observer = new IntersectionObserver((entries) => {
     const entry = entries[0];
     if (!entry) return;
-    if (entry.isIntersecting && entry.intersectionRatio >= .2) {
+    if (entry.isIntersecting && entry.intersectionRect.height >= 80) {
       if (visible) return;
       visible = true;
       start();
-    } else if (!entry.isIntersecting || entry.intersectionRatio < .08) {
+    } else if (!entry.isIntersecting) {
       visible = false;
       cycle += 1;
       setPosition(0);
     }
-  }, { threshold: [0, .08, .2, .5] });
+  }, { threshold: [0, .02, .05, .1] });
 
   observer.observe(section);
 
