@@ -374,7 +374,7 @@
   const observer = new IntersectionObserver((entries) => {
     const entry = entries[0];
     if (!entry) return;
-    const shouldRun = entry.isIntersecting && entry.intersectionRatio >= .18;
+    const shouldRun = entry.isIntersecting && entry.intersectionRect.height >= 100;
     if (shouldRun && !visible) {
       visible = true;
       start();
@@ -383,7 +383,7 @@
       runId += 1;
       resetState();
     }
-  }, { threshold: [0, .18, .35, .6] });
+  }, { threshold: [0, .02, .08, .18] });
 
   observer.observe(section);
 })();
