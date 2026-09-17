@@ -52,6 +52,6 @@
   });
 })();
 
-import("/photo-gallery.js?v=1").catch((error) => {
+import("/photo-gallery.js?v=3").catch((error) => {
   console.error("Photo gallery failed to load", error);
 });
