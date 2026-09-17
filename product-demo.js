@@ -50,12 +50,12 @@
           <div class="dai-viewport">
             <section class="dai-scene dai-agent-scene is-active" data-scene="agent">
               <div class="dai-agent-start">
-                <span class="dai-agent-eyebrow">Рабочее поле</span>
-                <h4 class="dai-agent-title">Агент</h4>
-                <p class="dai-agent-subtitle">Рабочий диалог с агентом Direct AI.</p>
+                <span class="dai-agent-eyebrow">Агент готов</span>
+                <h4 class="dai-agent-title">Что нужно сделать с рекламой?</h4>
+                <p class="dai-agent-subtitle">Опиши задачу обычным языком или передай готовый бриф файлом. Агент сам поднимет доступные данные и нужный контекст.</p>
 
                 <div class="dai-composer">
-                  <span class="dai-composer-text">Напиши задачу агенту</span>
+                  <span class="dai-composer-text">Например: создай кампанию или проверь, почему выросла цена заявки</span>
                   <span class="dai-send">↑</span>
                 </div>
 
