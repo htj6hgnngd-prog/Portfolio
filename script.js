@@ -19,10 +19,21 @@ const $$ = (s) => [...document.querySelectorAll(s)];
 function restoreAIPlayer() {
   const player = $("#ai-player");
   const home = $("#ai-player-home");
-  if (!player || !home || player.parentElement === home) return;
+  if (!player || !home) return;
+
+  player.pause();
+  player.controls = false;
+  player.muted = true;
   player.setAttribute("tabindex", "-1");
   player.setAttribute("aria-hidden", "true");
-  home.insertBefore(player, home.firstChild);
+
+  if (player.parentElement !== home) home.insertBefore(player, home.firstChild);
+
+  try {
+    if (player.readyState > 0) player.currentTime = 0;
+  } catch {
+    // Some mobile browsers can briefly reject seeks while metadata is changing.
+  }
 }
 
 function resetViewer() {
@@ -78,12 +89,16 @@ function renderAI() {
   $("#viewer-source").href = ai.behance;
   $("#viewer-controls").hidden = true;
 
-  player.loading = "eager";
+  player.controls = true;
+  player.muted = false;
   player.setAttribute("tabindex", "0");
   player.setAttribute("aria-hidden", "false");
   frame.replaceChildren(player);
 
   openViewer();
+
+  const playPromise = player.play();
+  if (playPromise?.catch) playPromise.catch(() => {});
 }
 
 function openViewer() {
@@ -108,7 +123,8 @@ function prewarmAI() {
   const player = $("#ai-player");
   if (!player || player.dataset.prewarmed === "1") return;
   player.dataset.prewarmed = "1";
-  player.loading = "eager";
+  player.preload = "auto";
+  player.load();
 }
 
 $("#youtube-featured").addEventListener("click", () => renderYoutube(activeVideo));
@@ -148,12 +164,12 @@ if (aiSection && "IntersectionObserver" in window) {
       prewarmAI();
       instance.disconnect();
     }
-  }, { rootMargin: "1400px 0px" });
+  }, { rootMargin: "1800px 0px" });
   observer.observe(aiSection);
 }
 
 window.addEventListener("load", () => {
-  if (!navigator.connection?.saveData) setTimeout(prewarmAI, 400);
+  if (!navigator.connection?.saveData) setTimeout(prewarmAI, 120);
 }, { once: true });
 
 window.addEventListener("scroll", updateNav, { passive: true });
