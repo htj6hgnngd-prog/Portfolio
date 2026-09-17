@@ -182,7 +182,25 @@ async function verifyPromoSources() {
     if (!preview.ok) throw new Error(`${path}: preview ${preview.status}`);
     const bytes = Buffer.from(await preview.arrayBuffer());
     const type = preview.headers.get("content-type") || "unknown";
-    console.log(`${path} verified: ${type}, ${bytes.length} bytes`);
+    console.log(`${path} verified upstream: ${type}, ${bytes.length} bytes`);
+  }
+}
+
+async function verifyLocalPromoRoutes() {
+  for (const [path, item] of Object.entries(EVENT_MEDIA)) {
+    const options = item.type === "video"
+      ? { headers: { range: "bytes=0-1023" } }
+      : {};
+    const response = await fetch(`http://127.0.0.1:${externalPort}${path}`, options);
+    const type = response.headers.get("content-type") || "unknown";
+    const bytes = Buffer.from(await response.arrayBuffer());
+    const acceptable = item.type === "video"
+      ? (response.status === 200 || response.status === 206) && type.startsWith("video/")
+      : response.status === 200 && type.startsWith("image/") && bytes.length > 0;
+    if (!acceptable) {
+      throw new Error(`${path}: local route failed status=${response.status} type=${type} bytes=${bytes.length}`);
+    }
+    console.log(`${path} verified locally: status=${response.status}, ${type}, ${bytes.length} bytes`);
   }
 }
 
@@ -221,4 +239,7 @@ const server = http.createServer(async (req, res) => {
 server.listen(externalPort, "0.0.0.0", () => {
   console.log(`Portfolio media proxy listening on ${externalPort}, internal app on ${internalPort}`);
   verifyPromoSources().catch((error) => console.error("Promo cover verification failed:", error));
+  setTimeout(() => {
+    verifyLocalPromoRoutes().catch((error) => console.error("Promo local route verification failed:", error));
+  }, 300);
 });
