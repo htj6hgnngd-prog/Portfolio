@@ -1,0 +1,146 @@
+name: Verify portfolio production
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-portfolio-production.yml'
+      - 'index.html'
+      - 'core.css'
+      - 'script.js'
+      - 'section-loader.js'
+      - 'photo-gallery.js'
+      - 'photo.css'
+      - 'product-demo.js'
+      - 'product-demo.css'
+      - 'site-case.js'
+      - 'site-case.css'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Verify production layout and loading
+        shell: bash
+        run: |
+          cat > verify-production.cjs <<'NODE'
+          const { chromium } = require('playwright');
+          const assert = require('node:assert/strict');
+          const url = 'https://portfolio-main-production-fdd5.up.railway.app/';
+
+          async function open(viewport) {
+            const browser = await chromium.launch({ headless: true });
+            const page = await browser.newPage({ viewport });
+            const requests = [];
+            page.on('request', req => requests.push(req.url()));
+            await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 120000 });
+            await page.waitForSelector('.hero h1', { timeout: 30000 });
+            await page.waitForTimeout(1600);
+            return { browser, page, requests };
+          }
+
+          async function desktop() {
+            const { browser, page, requests } = await open({ width: 1440, height: 1000 });
+
+            const initial = await page.evaluate(() => {
+              const ids = ['youtube','video','ai','photo','product','site'];
+              const rects = ids.map(id => {
+                const el = document.getElementById(id);
+                const r = el.getBoundingClientRect();
+                const cs = getComputedStyle(el);
+                return {
+                  id, top:r.top, bottom:r.bottom, width:r.width,
+                  paddingTop:parseFloat(cs.paddingTop), paddingBottom:parseFloat(cs.paddingBottom),
+                  borderBottom:parseFloat(cs.borderBottomWidth)
+                };
+              });
+              return {
+                viewport: innerWidth,
+                scrollWidth: document.documentElement.scrollWidth,
+                stylesheets: [...document.styleSheets].map(s => s.href).filter(Boolean),
+                rects,
+                productLoaded: document.getElementById('product').classList.contains('product-demo-section'),
+                siteLoaded: document.getElementById('site').classList.contains('site-case-section')
+              };
+            });
+
+            assert.ok(initial.scrollWidth <= initial.viewport + 2, `desktop horizontal overflow ${initial.scrollWidth}/${initial.viewport}`);
+            assert.ok(initial.stylesheets.some(h => h.includes('/core.css?v=1')), 'core stylesheet missing');
+            assert.equal(initial.stylesheets.filter(h => /\/(styles|hotfix|ai)\.css/.test(h)).length, 0, 'old blocking stylesheets still loaded');
+            initial.rects.forEach(r => {
+              assert.ok(r.paddingTop >= 40, `${r.id}: unsafe top spacing ${r.paddingTop}`);
+              assert.ok(r.paddingBottom >= 45, `${r.id}: unsafe bottom spacing ${r.paddingBottom}`);
+              assert.ok(r.borderBottom >= 3, `${r.id}: section divider missing`);
+            });
+            for (let i=1;i<initial.rects.length;i++) {
+              assert.ok(initial.rects[i].top >= initial.rects[i-1].bottom - 2, `sections overlap: ${initial.rects[i-1].id}/${initial.rects[i].id}`);
+            }
+
+            const heavyOnLoad = requests.filter(u => /\/media\/(?:ai-video|cartoon-video|promo-[12]-video)/.test(u));
+            assert.equal(heavyOnLoad.length, 0, `heavy video requested on initial load: ${heavyOnLoad.join(', ')}`);
+
+            await page.locator('#photo').scrollIntoViewIfNeeded();
+            await page.waitForSelector('#photo.photo-section', { timeout: 30000 });
+
+            await page.locator('#product').scrollIntoViewIfNeeded();
+            await page.waitForSelector('#product.product-demo-section .dai-demo-frame', { timeout: 30000 });
+            const p1 = await page.locator('.product-demo-story-kicker').textContent();
+            await page.waitForTimeout(4000);
+            const p2 = await page.locator('.product-demo-story-kicker').textContent();
+            assert.notEqual(p2, p1, 'Direct AI story animation did not advance');
+
+            await page.locator('#site').scrollIntoViewIfNeeded();
+            await page.waitForSelector('#site.site-case-section .site-case-capture', { timeout: 30000 });
+            await page.waitForFunction(() => {
+              const img = document.querySelector('.site-case-capture');
+              return img?.complete && img.naturalWidth === 1440;
+            }, null, { timeout: 60000 });
+            const t1 = await page.locator('.site-case-capture').evaluate(el => getComputedStyle(el).transform);
+            await page.waitForTimeout(5200);
+            const t2 = await page.locator('.site-case-capture').evaluate(el => getComputedStyle(el).transform);
+            assert.notEqual(t2, t1, 'site case autoplay did not advance');
+
+            const finalOverflow = await page.evaluate(() => [document.documentElement.scrollWidth, innerWidth]);
+            assert.ok(finalOverflow[0] <= finalOverflow[1] + 2, `desktop overflow after dynamic sections ${finalOverflow}`);
+            console.log('desktop PASS', JSON.stringify({initialRequests:requests.length, productStep:[p1,p2]}));
+            await browser.close();
+          }
+
+          async function mobile() {
+            const { browser, page } = await open({ width: 390, height: 844 });
+            await page.locator('#product').scrollIntoViewIfNeeded();
+            await page.waitForSelector('#product.product-demo-section .dai-demo-frame', { timeout: 30000 });
+            await page.locator('#site').scrollIntoViewIfNeeded();
+            await page.waitForSelector('#site.site-case-section', { timeout: 30000 });
+            const state = await page.evaluate(() => ({
+              viewport: innerWidth,
+              scrollWidth: document.documentElement.scrollWidth,
+              navHeight: document.querySelector('.nav-grid')?.getBoundingClientRect().height,
+              productWidth: document.querySelector('.dai-demo-frame')?.getBoundingClientRect().width,
+              siteWidth: document.querySelector('.site-browser')?.getBoundingClientRect().width,
+              mainLeft: document.querySelector('main')?.getBoundingClientRect().left
+            }));
+            assert.ok(state.scrollWidth <= state.viewport + 2, `mobile horizontal overflow ${state.scrollWidth}/${state.viewport}`);
+            assert.ok(state.navHeight >= 80 && state.navHeight <= 96, `mobile nav unsafe height ${state.navHeight}`);
+            assert.ok(state.productWidth <= state.viewport - 20, `product frame too wide ${state.productWidth}`);
+            assert.ok(state.siteWidth <= state.viewport - 20, `site frame too wide ${state.siteWidth}`);
+            assert.ok(state.mainLeft >= 0, 'main shifted outside viewport');
+            console.log('mobile PASS', JSON.stringify(state));
+            await browser.close();
+          }
+
+          (async () => {
+            await desktop();
+            await mobile();
+          })().catch(error => { console.error(error); process.exit(1); });
+          NODE
+          node verify-production.cjs
