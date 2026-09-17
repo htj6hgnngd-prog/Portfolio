@@ -33,11 +33,11 @@
   pointer-events: none;
 }
 
-/* Canonical supplied artwork for the cartoon card. This is independent of
-   Safari's video-poster handling and remains visible until the card is opened. */
+/* Canonical supplied artwork for the cartoon card. The versioned query avoids
+   Safari reusing the old broken response from cache. */
 #ai-cartoon-home .ai-cover {
   z-index: 1;
-  background: #090909 url("/cartoon-cover-v2.jpg") center center / cover no-repeat;
+  background: #090909 url("/cartoon-cover.jpeg?v=2") center center / cover no-repeat;
 }
 
 .viewer-frame .ai-native-video {
