@@ -30,9 +30,10 @@ const server = http.createServer(async (req, res) => {
     }
     const body = await readFile(file);
     const ext = path.extname(file).toLowerCase();
+    const dynamicAsset = ext === ".html" || ext === ".css" || ext === ".js";
     res.writeHead(200, {
       "content-type": types[ext] || "application/octet-stream",
-      "cache-control": ext === ".html" ? "no-cache" : "public, max-age=604800"
+      "cache-control": dynamicAsset ? "no-store, max-age=0" : "public, max-age=604800"
     });
     res.end(body);
   } catch {
