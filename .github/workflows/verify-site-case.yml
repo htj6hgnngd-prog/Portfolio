@@ -1,0 +1,77 @@
+name: Verify production site case
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-site-case.yml'
+
+jobs:
+  verify:
+    if: github.event.head_commit.message == 'Verify production site case'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Verify desktop and mobile production rendering
+        shell: bash
+        run: |
+          cat > /tmp/verify-site-case.cjs <<'NODE'
+          const { chromium } = require('playwright');
+          const assert = require('node:assert/strict');
+          const url = 'https://portfolio-main-production-fdd5.up.railway.app/';
+
+          async function verify(viewport, name) {
+            const browser = await chromium.launch({ headless: true });
+            const page = await browser.newPage({ viewport });
+            await page.goto(url, { waitUntil: 'networkidle', timeout: 120000 });
+            await page.waitForFunction(() => document.querySelector('#site.site-case-section'), null, { timeout: 30000 });
+            await page.evaluate(() => document.querySelector('#site').scrollIntoView({ block: 'center' }));
+            await page.waitForTimeout(1200);
+
+            const basics = await page.evaluate(() => {
+              const site = document.querySelector('#site');
+              const screen = site.querySelector('.site-case-screen');
+              const imgs = [...site.querySelectorAll('img')];
+              return {
+                title: site.querySelector('.site-case-title')?.textContent?.trim(),
+                pending: site.textContent.includes('МАТЕРИАЛЫ ПОЗЖЕ'),
+                images: imgs.map(img => ({ complete: img.complete, width: img.naturalWidth, src: img.getAttribute('src') })),
+                screenTop: screen.scrollTop,
+                bodyWidth: document.documentElement.scrollWidth,
+                viewportWidth: window.innerWidth,
+                stages: site.querySelectorAll('[data-site-step]').length,
+                liveHref: site.querySelector('.site-case-live')?.href
+              };
+            });
+
+            assert.equal(basics.title, 'DENISOV PHOTO', `${name}: title`);
+            assert.equal(basics.pending, false, `${name}: pending placeholder still visible`);
+            assert.equal(basics.stages, 5, `${name}: stage count`);
+            assert.ok(basics.liveHref.startsWith('https://denisovphoto.ru/'), `${name}: live link`);
+            assert.ok(basics.images.length >= 7, `${name}: image count`);
+            for (const img of basics.images) assert.ok(img.complete && img.width > 0, `${name}: failed image ${img.src}`);
+            assert.ok(basics.bodyWidth <= basics.viewportWidth + 2, `${name}: horizontal overflow ${basics.bodyWidth}/${basics.viewportWidth}`);
+
+            const before = await page.locator('.site-case-screen').evaluate(el => el.scrollTop);
+            await page.waitForTimeout(5200);
+            const after = await page.locator('.site-case-screen').evaluate(el => el.scrollTop);
+            assert.ok(after > before + 80, `${name}: autoplay did not advance (${before} -> ${after})`);
+
+            console.log(`${name}: PASS; autoplay ${before} -> ${after}; images=${basics.images.length}; width=${basics.bodyWidth}/${basics.viewportWidth}`);
+            await browser.close();
+          }
+
+          (async () => {
+            await verify({ width: 1440, height: 1100 }, 'desktop');
+            await verify({ width: 390, height: 844 }, 'mobile');
+          })().catch(err => { console.error(err); process.exit(1); });
+          NODE
+          node /tmp/verify-site-case.cjs
