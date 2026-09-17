@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import { createWriteStream } from "node:fs";
-import { rename, stat } from "node:fs/promises";
+import { copyFile, rename, stat, unlink } from "node:fs/promises";
 import { pipeline } from "node:stream/promises";
 import { Readable } from "node:stream";
 import path from "node:path";
@@ -16,7 +16,7 @@ const items = [
     source: "/tmp/portfolio-promo-1-source.mov",
     video: "/tmp/portfolio-promo-1.mp4",
     cover: path.join(root, "promo-1-cover.jpg"),
-    coverTime: "00:00:06.000"
+    coverTimes: ["00:00:08.000", "00:00:14.000", "00:00:20.000", "00:00:26.000", "00:00:32.000"]
   },
   {
     name: "promo-2",
@@ -24,7 +24,7 @@ const items = [
     source: "/tmp/portfolio-promo-2-source.mov",
     video: "/tmp/portfolio-promo-2.mp4",
     cover: path.join(root, "promo-2-cover.jpg"),
-    coverTime: "00:00:06.000"
+    coverTimes: ["00:00:06.000"]
   }
 ];
 
@@ -63,7 +63,7 @@ async function resolveMetadata(publicUrl) {
     redirect: "follow",
     headers: {
       accept: "application/json",
-      "user-agent": "Mozilla/5.0 PortfolioEventMediaBuilder/4.0"
+      "user-agent": "Mozilla/5.0 PortfolioEventMediaBuilder/5.0"
     }
   });
   if (!response.ok) throw new Error(`Yandex metadata ${response.status}`);
@@ -75,10 +75,43 @@ async function resolveMetadata(publicUrl) {
 async function downloadFile(url, output) {
   const response = await fetch(url, {
     redirect: "follow",
-    headers: { "user-agent": "Mozilla/5.0 PortfolioEventMediaBuilder/4.0" }
+    headers: { "user-agent": "Mozilla/5.0 PortfolioEventMediaBuilder/5.0" }
   });
   if (!response.ok || !response.body) throw new Error(`event source download ${response.status}`);
   await pipeline(Readable.fromWeb(response.body), createWriteStream(output));
+}
+
+async function buildCover(item) {
+  let best = null;
+  const candidates = [];
+
+  for (let i = 0; i < item.coverTimes.length; i += 1) {
+    const at = item.coverTimes[i];
+    const candidate = `${item.cover}.candidate-${i}.jpg`;
+    try {
+      await runFFmpeg([
+        "-y", "-hide_banner", "-loglevel", "error",
+        "-ss", at,
+        "-i", item.source,
+        "-frames:v", "1",
+        "-vf", "scale=1280:-2",
+        "-q:v", "2",
+        candidate
+      ], `${item.name} cover ${at}`);
+      const info = await stat(candidate);
+      candidates.push(candidate);
+      if (info.size >= 5000 && (!best || info.size > best.size)) {
+        best = { path: candidate, size: info.size, at };
+      }
+    } catch (error) {
+      console.warn(`${item.name}: cover candidate ${at} skipped: ${error.message}`);
+    }
+  }
+
+  if (!best) throw new Error(`${item.name}: no valid cover candidate`);
+  await copyFile(best.path, item.cover);
+  await Promise.all(candidates.map((candidate) => unlink(candidate).catch(() => {})));
+  console.log(`${item.name}: selected cover frame ${best.at}, ${(best.size / 1024).toFixed(0)} KB`);
 }
 
 for (const item of items) {
@@ -121,15 +154,7 @@ for (const item of items) {
     throw new Error(`${item.name}: unsupported output codec ${codec}`);
   }
 
-  await runFFmpeg([
-    "-y", "-hide_banner", "-loglevel", "error",
-    "-ss", item.coverTime,
-    "-i", item.source,
-    "-frames:v", "1",
-    "-vf", "scale=1280:-2",
-    "-q:v", "2",
-    item.cover
-  ], `${item.name} cover`);
+  await buildCover(item);
 
   const videoInfo = await stat(item.video);
   const coverInfo = await stat(item.cover);
