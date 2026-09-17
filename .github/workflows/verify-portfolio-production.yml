@@ -109,6 +109,15 @@ jobs:
             const t2 = await page.locator('.site-case-capture').evaluate(el => getComputedStyle(el).transform);
             assert.notEqual(t2, t1, 'site case autoplay did not advance');
 
+            const typography = await page.evaluate(() => ({
+              secondaryAI: parseFloat(getComputedStyle(document.querySelector('#ai .ai-work--secondary .work-meta strong')).fontSize),
+              productHead: parseFloat(getComputedStyle(document.querySelector('.product-demo-head-copy h3')).fontSize),
+              productStory: parseFloat(getComputedStyle(document.querySelector('.product-demo-story-title')).fontSize),
+              hasLongDash: document.body.innerText.includes('—') || document.body.innerText.includes('–')
+            }));
+            assert.ok(typography.secondaryAI <= 44, `desktop secondary AI title unexpectedly large ${typography.secondaryAI}`);
+            assert.equal(typography.hasLongDash, false, 'long dash found in visible copy');
+
             const finalOverflow = await page.evaluate(() => [document.documentElement.scrollWidth, innerWidth]);
             assert.ok(finalOverflow[0] <= finalOverflow[1] + 2, `desktop overflow after dynamic sections ${finalOverflow}`);
             console.log('desktop PASS', JSON.stringify({initialRequests:requests.length, productStep:[p1,p2]}));
@@ -134,7 +143,16 @@ jobs:
             assert.ok(state.productWidth <= state.viewport - 20, `product frame too wide ${state.productWidth}`);
             assert.ok(state.siteWidth <= state.viewport - 20, `site frame too wide ${state.siteWidth}`);
             assert.ok(state.mainLeft >= 0, 'main shifted outside viewport');
-            console.log('mobile PASS', JSON.stringify(state));
+            const type = await page.evaluate(() => ({
+              aiSecondary: parseFloat(getComputedStyle(document.querySelector('#ai .ai-work--secondary .work-meta strong')).fontSize),
+              productHead: parseFloat(getComputedStyle(document.querySelector('.product-demo-head-copy h3')).fontSize),
+              productStory: parseFloat(getComputedStyle(document.querySelector('.product-demo-story-title')).fontSize),
+              textAdjust: getComputedStyle(document.documentElement).webkitTextSizeAdjust || getComputedStyle(document.documentElement).textSizeAdjust
+            }));
+            assert.ok(type.aiSecondary <= 31, `mobile AI secondary title too large ${type.aiSecondary}`);
+            assert.ok(type.productHead <= 32, `mobile product heading too large ${type.productHead}`);
+            assert.ok(type.productStory <= 22, `mobile product story too large ${type.productStory}`);
+            console.log('mobile PASS', JSON.stringify({ ...state, type }));
             await browser.close();
           }
 

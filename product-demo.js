@@ -5,7 +5,7 @@
   if (!document.querySelector('link[href^="/product-demo.css"]')) {
     const stylesheet = document.createElement("link");
     stylesheet.rel = "stylesheet";
-    stylesheet.href = "/product-demo.css?v=3";
+    stylesheet.href = "/product-demo.css?v=4";
     document.head.appendChild(stylesheet);
   }
 
@@ -220,8 +220,8 @@
   const storyCopy = {
     agent: ["01 / ЗАДАЧА", "СТАВИШЬ ЗАДАЧУ ОБЫЧНЫМ ЯЗЫКОМ."],
     review: ["02 / АНАЛИЗ", "АГЕНТ СРАВНИВАЕТ ПЕРИОДЫ, ИЩЕТ ОТКЛОНЕНИЯ И ПРОВЕРЯЕТ ПРИЧИНЫ."],
-    dashboard: ["03 / ВЫВОД", "НЕ ПРОСТО МЕТРИКИ — ТОЛЬКО ВЫВОДЫ, КОТОРЫЕ МОЖНО ПРОВЕРИТЬ."],
-    campaigns: ["04 / КОНТРОЛЬ", "КАМПАНИИ И СОСТОЯНИЕ КАБИНЕТА — В ОДНОМ РАБОЧЕМ ПРОСТРАНСТВЕ."],
+    dashboard: ["03 / ВЫВОД", "НЕ ПРОСТО МЕТРИКИ: ТОЛЬКО ВЫВОДЫ, КОТОРЫЕ МОЖНО ПРОВЕРИТЬ."],
+    campaigns: ["04 / КОНТРОЛЬ", "КАМПАНИИ И СОСТОЯНИЕ КАБИНЕТА: В ОДНОМ РАБОЧЕМ ПРОСТРАНСТВЕ."],
     menu: ["05 / СИСТЕМА", "РЕШЕНИЯ, ПОИСКОВЫЕ ЗАПРОСЫ, ИСТОРИЯ АНАЛИЗОВ, ЛИДЫ И ПРОДАЖИ."],
     summary: ["DIRECT AI", "ДАННЫЕ → АНАЛИЗ → РЕШЕНИЕ → ДЕЙСТВИЕ"]
   };

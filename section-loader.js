@@ -40,8 +40,8 @@
 
   near("photo", 1200, () => import("/photo-gallery.js?v=5"));
   near("product", 1700, async () => {
-    await loadStyle("/product-demo.css?v=3");
-    await import("/product-demo.js?v=3");
+    await loadStyle("/product-demo.css?v=4");
+    await import("/product-demo.js?v=4");
   });
   near("site", 1900, async () => {
     await loadStyle("/site-case.css?v=4");
