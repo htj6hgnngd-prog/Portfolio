@@ -1,136 +1,68 @@
 import http from "node:http";
 import { spawn } from "node:child_process";
-import { Readable } from "node:stream";
+import { createReadStream } from "node:fs";
+import { stat } from "node:fs/promises";
 
 const externalPort = Number(process.env.PORT || 3000);
 const internalPort = externalPort === 3001 ? 3002 : 3001;
 
-const EVENT_MEDIA = {
-  "/media/promo-1-video": {
-    publicUrl: "https://disk.yandex.ru/i/iIj6z28I2z0d3w",
-    type: "video"
-  },
-  "/media/promo-1-poster": {
-    publicUrl: "https://disk.yandex.ru/i/iIj6z28I2z0d3w",
-    type: "poster"
-  },
-  "/media/promo-2-video": {
-    publicUrl: "https://disk.yandex.ru/i/CGJbZxDuh1ORXw",
-    type: "video"
-  },
-  "/media/promo-2-poster": {
-    publicUrl: "https://disk.yandex.ru/i/CGJbZxDuh1ORXw",
-    type: "poster"
-  }
+const EVENT_VIDEO_FILES = {
+  "/media/promo-1-video": "/tmp/portfolio-promo-1.mp4",
+  "/media/promo-2-video": "/tmp/portfolio-promo-2.mp4"
 };
 
-const metaCache = new Map();
-const downloadCache = new Map();
+function parseRange(range, total) {
+  if (!range) return null;
+  const match = /^bytes=(\d*)-(\d*)$/.exec(range);
+  if (!match) return { invalid: true };
 
-async function resolveMeta(publicUrl) {
-  const cached = metaCache.get(publicUrl);
-  if (cached && Date.now() < cached.expiresAt) return cached.data;
-
-  const api = `https://cloud-api.yandex.net/v1/disk/public/resources?public_key=${encodeURIComponent(publicUrl)}`;
-  const response = await fetch(api, {
-    redirect: "follow",
-    headers: {
-      accept: "application/json",
-      "user-agent": "Mozilla/5.0 PortfolioPromoProxy/1.0"
-    }
-  });
-
-  if (!response.ok) throw new Error(`Yandex metadata ${response.status}`);
-  const json = await response.json();
-  const data = {
-    preview: json.preview || null,
-    mime: json.mime_type || "video/mp4"
-  };
-  metaCache.set(publicUrl, { data, expiresAt: Date.now() + 30 * 60 * 1000 });
-  return data;
-}
-
-async function resolveDownload(publicUrl) {
-  const cached = downloadCache.get(publicUrl);
-  if (cached && Date.now() < cached.expiresAt) return cached.href;
-
-  const api = `https://cloud-api.yandex.net/v1/disk/public/resources/download?public_key=${encodeURIComponent(publicUrl)}`;
-  const response = await fetch(api, {
-    redirect: "follow",
-    headers: {
-      accept: "application/json",
-      "user-agent": "Mozilla/5.0 PortfolioPromoProxy/1.0"
-    }
-  });
-
-  if (!response.ok) throw new Error(`Yandex download API ${response.status}`);
-  const json = await response.json();
-  if (!json.href) throw new Error("Yandex download href missing");
-  downloadCache.set(publicUrl, { href: json.href, expiresAt: Date.now() + 20 * 60 * 1000 });
-  return json.href;
-}
-
-async function servePoster(req, res, publicUrl) {
-  const meta = await resolveMeta(publicUrl);
-  if (!meta.preview) throw new Error("Yandex preview missing");
-
-  const upstream = await fetch(meta.preview, {
-    redirect: "follow",
-    headers: {
-      accept: "image/avif,image/webp,image/*,*/*;q=0.8",
-      "user-agent": req.headers["user-agent"] || "Mozilla/5.0 PortfolioPromoProxy/1.0"
-    }
-  });
-
-  if (!upstream.ok) throw new Error(`Yandex preview ${upstream.status}`);
-  const body = Buffer.from(await upstream.arrayBuffer());
-  const contentType = upstream.headers.get("content-type") || "image/jpeg";
-
-  res.writeHead(200, {
-    "content-type": contentType,
-    "content-length": body.length,
-    "cache-control": "public, max-age=3600",
-    "access-control-allow-origin": "*"
-  });
-  if (req.method === "HEAD") return res.end();
-  res.end(body);
-}
-
-async function serveVideo(req, res, publicUrl) {
-  const href = await resolveDownload(publicUrl);
-  const headers = {
-    "user-agent": req.headers["user-agent"] || "Mozilla/5.0 PortfolioPromoProxy/1.0"
-  };
-  if (req.headers.range) headers.range = req.headers.range;
-
-  const upstream = await fetch(href, {
-    method: "GET",
-    redirect: "follow",
-    headers
-  });
-
-  if (!(upstream.ok || upstream.status === 206)) {
-    throw new Error(`Yandex video ${upstream.status}`);
+  let start;
+  let end;
+  if (!match[1] && match[2]) {
+    const suffix = Number(match[2]);
+    if (!Number.isFinite(suffix) || suffix <= 0) return { invalid: true };
+    start = Math.max(total - suffix, 0);
+    end = total - 1;
+  } else {
+    start = match[1] ? Number(match[1]) : 0;
+    end = match[2] ? Math.min(Number(match[2]), total - 1) : total - 1;
   }
 
-  const responseHeaders = {
-    "content-type": upstream.headers.get("content-type") || "video/mp4",
-    "accept-ranges": upstream.headers.get("accept-ranges") || "bytes",
-    "cache-control": "public, max-age=3600",
+  if (!Number.isFinite(start) || !Number.isFinite(end) || start < 0 || start > end || start >= total) {
+    return { invalid: true };
+  }
+  return { start, end };
+}
+
+async function serveLocalVideo(req, res, file) {
+  const info = await stat(file);
+  const total = info.size;
+  const range = parseRange(req.headers.range, total);
+  const common = {
+    "content-type": "video/mp4",
+    "accept-ranges": "bytes",
+    "cache-control": "public, max-age=86400",
     "access-control-allow-origin": "*"
   };
-  const contentLength = upstream.headers.get("content-length");
-  const contentRange = upstream.headers.get("content-range");
-  if (contentLength) responseHeaders["content-length"] = contentLength;
-  if (contentRange) responseHeaders["content-range"] = contentRange;
 
-  res.writeHead(upstream.status, responseHeaders);
-  if (req.method === "HEAD") {
-    upstream.body?.cancel().catch(() => {});
+  if (!range) {
+    res.writeHead(200, { ...common, "content-length": total });
+    if (req.method === "HEAD") return res.end();
+    return createReadStream(file).pipe(res);
+  }
+
+  if (range.invalid) {
+    res.writeHead(416, { "content-range": `bytes */${total}` });
     return res.end();
   }
-  if (!upstream.body) return res.end();
-  Readable.fromWeb(upstream.body).pipe(res);
+
+  res.writeHead(206, {
+    ...common,
+    "content-range": `bytes ${range.start}-${range.end}/${total}`,
+    "content-length": range.end - range.start + 1
+  });
+  if (req.method === "HEAD") return res.end();
+  createReadStream(file, { start: range.start, end: range.end }).pipe(res);
 }
 
 function proxyToInternal(req, res) {
@@ -162,7 +94,7 @@ function proxyToInternal(req, res) {
 async function waitForInternal() {
   for (let attempt = 0; attempt < 100; attempt += 1) {
     try {
-      const response = await fetch(`http://127.0.0.1:${internalPort}/`, { method: "GET" });
+      const response = await fetch(`http://127.0.0.1:${internalPort}/`);
       if (response.ok) {
         await response.arrayBuffer();
         return;
@@ -171,6 +103,14 @@ async function waitForInternal() {
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
   throw new Error("Internal portfolio server did not start");
+}
+
+async function verifyEventFiles() {
+  for (const [route, file] of Object.entries(EVENT_VIDEO_FILES)) {
+    const info = await stat(file);
+    if (info.size < 100000) throw new Error(`${route}: local video is too small`);
+    console.log(`${route} verified local H.264 MP4: ${(info.size / 1024 / 1024).toFixed(1)} MB`);
+  }
 }
 
 const child = spawn(process.execPath, ["server.js"], {
@@ -184,27 +124,26 @@ child.on("exit", (code, signal) => {
 });
 
 await waitForInternal();
+await verifyEventFiles();
 
 const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
-    const item = EVENT_MEDIA[url.pathname];
-    if (!item) return proxyToInternal(req, res);
-
-    if (item.type === "poster") {
-      await servePoster(req, res, item.publicUrl);
-    } else {
-      await serveVideo(req, res, item.publicUrl);
+    const localVideo = EVENT_VIDEO_FILES[url.pathname];
+    if (localVideo) {
+      await serveLocalVideo(req, res, localVideo);
+      return;
     }
+    proxyToInternal(req, res);
   } catch (error) {
-    console.error("Promo media proxy error:", error);
+    console.error("Portfolio proxy error:", error);
     if (!res.headersSent) {
       res.writeHead(502, { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" });
     }
-    res.end("Promo media unavailable");
+    res.end("Media unavailable");
   }
 });
 
 server.listen(externalPort, "0.0.0.0", () => {
-  console.log(`Portfolio media proxy listening on ${externalPort}, internal app on ${internalPort}`);
+  console.log(`Portfolio proxy listening on ${externalPort}, internal app on ${internalPort}`);
 });
