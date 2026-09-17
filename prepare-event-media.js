@@ -16,8 +16,8 @@ const items = [
     source: "/tmp/portfolio-promo-1-source.mov",
     video: "/tmp/portfolio-promo-1.mp4",
     cover: path.join(root, "promo-1-cover.jpg"),
-    coverTimes: ["00:00:05.000", "00:00:10.000", "00:00:15.000", "00:00:20.000", "00:00:25.000", "00:00:30.000", "00:00:35.000", "00:00:40.000"],
-    keepCandidates: true
+    coverTimes: ["00:00:07.000"],
+    keepCandidates: false
   },
   {
     name: "promo-2",
@@ -65,7 +65,7 @@ async function resolveMetadata(publicUrl) {
     redirect: "follow",
     headers: {
       accept: "application/json",
-      "user-agent": "Mozilla/5.0 PortfolioEventMediaBuilder/6.0"
+      "user-agent": "Mozilla/5.0 PortfolioEventMediaBuilder/7.0"
     }
   });
   if (!response.ok) throw new Error(`Yandex metadata ${response.status}`);
@@ -77,7 +77,7 @@ async function resolveMetadata(publicUrl) {
 async function downloadFile(url, output) {
   const response = await fetch(url, {
     redirect: "follow",
-    headers: { "user-agent": "Mozilla/5.0 PortfolioEventMediaBuilder/6.0" }
+    headers: { "user-agent": "Mozilla/5.0 PortfolioEventMediaBuilder/7.0" }
   });
   if (!response.ok || !response.body) throw new Error(`event source download ${response.status}`);
   await pipeline(Readable.fromWeb(response.body), createWriteStream(output));
@@ -117,7 +117,7 @@ async function buildCover(item) {
   if (!item.keepCandidates) {
     await Promise.all(candidates.map((candidate) => unlink(candidate).catch(() => {})));
   }
-  console.log(`${item.name}: selected temporary cover frame ${best.at}, ${(best.size / 1024).toFixed(0)} KB`);
+  console.log(`${item.name}: selected cover frame ${best.at}, ${(best.size / 1024).toFixed(0)} KB`);
 }
 
 for (const item of items) {
