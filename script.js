@@ -7,8 +7,7 @@ const works = [
 const ai = {
   title: "РЕКЛАМА ТОВАРА ДЛЯ МАРКЕТПЛЕЙСА",
   role: "ИИ-РОЛИК",
-  behance: "https://www.behance.net/gallery/230138193/Veo-3-AI-Ads",
-  player: "https://www-ccv.adobe.io/v1/player/ccv/5-9tzVe57JY/embed?api_key=behance1&bgcolor=%23191919"
+  behance: "https://www.behance.net/gallery/230138193/Veo-3-AI-Ads"
 };
 
 let activeVideo = 0;
@@ -17,14 +16,27 @@ let viewerType = null;
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 
+function restoreAIPlayer() {
+  const player = $("#ai-player");
+  const home = $("#ai-player-home");
+  if (!player || !home || player.parentElement === home) return;
+  player.setAttribute("tabindex", "-1");
+  player.setAttribute("aria-hidden", "true");
+  home.insertBefore(player, home.firstChild);
+}
+
 function resetViewer() {
   const viewer = $("#viewer");
   if (!viewer) return;
+
+  restoreAIPlayer();
+
+  const frame = $("#viewer-frame");
+  if (frame) frame.replaceChildren();
+
   viewer.classList.remove("is-open");
   viewer.hidden = true;
   viewer.setAttribute("aria-hidden", "true");
-  const frame = $("#viewer-frame");
-  if (frame) frame.innerHTML = "";
   document.body.classList.remove("modal-open");
   viewerType = null;
 }
@@ -42,6 +54,7 @@ function renderYoutube(index) {
   updateFeatured(index);
   const work = works[index];
   viewerType = "youtube";
+
   $("#viewer-title").textContent = work.title;
   $("#viewer-role").textContent = work.role;
   $("#viewer-source").textContent = "ЮТУБ ↗";
@@ -49,17 +62,27 @@ function renderYoutube(index) {
   $("#viewer-count").textContent = `${String(index + 1).padStart(2, "0")} / ${String(works.length).padStart(2, "0")}`;
   $("#viewer-controls").hidden = false;
   $("#viewer-frame").innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${work.id}?autoplay=1&rel=0&playsinline=1&modestbranding=1" title="${work.fullTitle.replaceAll('"', '&quot;')}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
+
   openViewer();
 }
 
 function renderAI() {
+  const player = $("#ai-player");
+  const frame = $("#viewer-frame");
+  if (!player || !frame) return;
+
   viewerType = "ai";
   $("#viewer-title").textContent = ai.title;
   $("#viewer-role").textContent = ai.role;
   $("#viewer-source").textContent = "БЕХАНС ↗";
   $("#viewer-source").href = ai.behance;
   $("#viewer-controls").hidden = true;
-  $("#viewer-frame").innerHTML = `<iframe src="${ai.player}" title="${ai.title}" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+
+  player.loading = "eager";
+  player.setAttribute("tabindex", "0");
+  player.setAttribute("aria-hidden", "false");
+  frame.replaceChildren(player);
+
   openViewer();
 }
 
@@ -79,6 +102,13 @@ function closeViewer() {
 function moveVideo(direction) {
   if (viewerType !== "youtube") return;
   renderYoutube((activeVideo + direction + works.length) % works.length);
+}
+
+function prewarmAI() {
+  const player = $("#ai-player");
+  if (!player || player.dataset.prewarmed === "1") return;
+  player.dataset.prewarmed = "1";
+  player.loading = "eager";
 }
 
 $("#youtube-featured").addEventListener("click", () => renderYoutube(activeVideo));
@@ -110,6 +140,21 @@ function updateNav() {
   });
   navButtons.forEach((button) => button.classList.toggle("is-active", button.dataset.target === current));
 }
+
+const aiSection = $("#ai");
+if (aiSection && "IntersectionObserver" in window) {
+  const observer = new IntersectionObserver((entries, instance) => {
+    if (entries.some((entry) => entry.isIntersecting)) {
+      prewarmAI();
+      instance.disconnect();
+    }
+  }, { rootMargin: "1400px 0px" });
+  observer.observe(aiSection);
+}
+
+window.addEventListener("load", () => {
+  if (!navigator.connection?.saveData) setTimeout(prewarmAI, 400);
+}, { once: true });
 
 window.addEventListener("scroll", updateNav, { passive: true });
 window.addEventListener("pageshow", resetViewer);
