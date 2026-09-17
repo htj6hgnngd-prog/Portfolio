@@ -23,7 +23,7 @@ jobs:
       - name: Verify desktop and mobile production rendering
         shell: bash
         run: |
-          cat > /tmp/verify-site-case.cjs <<'NODE'
+          cat > verify-site-case.cjs <<'NODE'
           const { chromium } = require('playwright');
           const assert = require('node:assert/strict');
           const url = 'https://portfolio-main-production-fdd5.up.railway.app/';
@@ -44,11 +44,11 @@ jobs:
                 title: site.querySelector('.site-case-title')?.textContent?.trim(),
                 pending: site.textContent.includes('МАТЕРИАЛЫ ПОЗЖЕ'),
                 images: imgs.map(img => ({ complete: img.complete, width: img.naturalWidth, src: img.getAttribute('src') })),
-                screenTop: screen.scrollTop,
                 bodyWidth: document.documentElement.scrollWidth,
                 viewportWidth: window.innerWidth,
                 stages: site.querySelectorAll('[data-site-step]').length,
-                liveHref: site.querySelector('.site-case-live')?.href
+                liveHref: site.querySelector('.site-case-live')?.href,
+                startScroll: screen.scrollTop
               };
             });
 
@@ -74,4 +74,4 @@ jobs:
             await verify({ width: 390, height: 844 }, 'mobile');
           })().catch(err => { console.error(err); process.exit(1); });
           NODE
-          node /tmp/verify-site-case.cjs
+          node verify-site-case.cjs
