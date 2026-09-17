@@ -26,9 +26,40 @@ const aiWorks = {
 let activeVideo = 0;
 let viewerType = null;
 let activeAIKey = null;
+let viewerScrollY = null;
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
+
+function lockViewerScroll() {
+  if (viewerScrollY !== null) return;
+  viewerScrollY = window.scrollY;
+  const body = document.body;
+  body.classList.add("modal-open");
+  body.style.position = "fixed";
+  body.style.top = `-${viewerScrollY}px`;
+  body.style.left = "0";
+  body.style.right = "0";
+  body.style.width = "100%";
+}
+
+function unlockViewerScroll() {
+  if (viewerScrollY === null) {
+    document.body.classList.remove("modal-open");
+    return;
+  }
+
+  const y = viewerScrollY;
+  viewerScrollY = null;
+  const body = document.body;
+  body.classList.remove("modal-open");
+  body.style.position = "";
+  body.style.top = "";
+  body.style.left = "";
+  body.style.right = "";
+  body.style.width = "";
+  window.scrollTo(0, y);
+}
 
 function prepareCartoonPoster() {
   const player = document.getElementById("ai-cartoon-player");
@@ -119,7 +150,7 @@ function resetViewer() {
   viewer.classList.remove("is-open");
   viewer.hidden = true;
   viewer.setAttribute("aria-hidden", "true");
-  document.body.classList.remove("modal-open");
+  unlockViewerScroll();
   viewerType = null;
   activeAIKey = null;
 }
@@ -183,10 +214,10 @@ function renderAI(key) {
 
 function openViewer() {
   const viewer = $("#viewer");
+  lockViewerScroll();
   viewer.hidden = false;
   viewer.setAttribute("aria-hidden", "false");
   viewer.classList.add("is-open");
-  document.body.classList.add("modal-open");
   $("#viewer-close").focus({ preventScroll: true });
 }
 
@@ -215,9 +246,21 @@ $$('[data-ai-work]').forEach((el) => el.addEventListener("click", () => renderAI
 $("#viewer-close").addEventListener("click", closeViewer);
 $("#viewer-prev").addEventListener("click", () => moveVideo(-1));
 $("#viewer-next").addEventListener("click", () => moveVideo(1));
-$("#viewer").addEventListener("pointerdown", (event) => {
-  if (event.target === $("#viewer")) closeViewer();
+
+const viewerElement = $("#viewer");
+viewerElement.addEventListener("pointerdown", (event) => {
+  const target = event.target instanceof Element ? event.target : null;
+  const isInteractive = target?.closest(".viewer-header, .viewer-frame, .viewer-controls");
+  if (!isInteractive) {
+    event.preventDefault();
+    closeViewer();
+  }
 });
+
+viewerElement.addEventListener("touchmove", (event) => {
+  const target = event.target instanceof Element ? event.target : null;
+  if (!target?.closest(".viewer-frame")) event.preventDefault();
+}, { passive: false });
 
 document.addEventListener("keydown", (event) => {
   if (!$("#viewer").classList.contains("is-open")) return;
