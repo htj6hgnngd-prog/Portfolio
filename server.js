@@ -5,6 +5,7 @@ import { pipeline } from "node:stream/promises";
 import { Readable } from "node:stream";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { brotliCompressSync, gzipSync, constants as zlibConstants } from "node:zlib";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const port = Number(process.env.PORT || 3000);
@@ -453,12 +454,38 @@ const server = http.createServer(async (req, res) => {
     }
     const body = await readFile(file);
     const ext = path.extname(file).toLowerCase();
-    const dynamicAsset = ext === ".html" || ext === ".css" || ext === ".js";
-    res.writeHead(200, {
+    const versioned = url.searchParams.has("v");
+    const textAsset = ext === ".html" || ext === ".css" || ext === ".js" || ext === ".svg";
+    const cacheControl = ext === ".html"
+      ? "no-store, max-age=0"
+      : versioned
+        ? "public, max-age=31536000, immutable"
+        : "public, max-age=604800, stale-while-revalidate=86400";
+
+    let output = body;
+    const headers = {
       "content-type": types[ext] || "application/octet-stream",
-      "cache-control": dynamicAsset ? "no-store, max-age=0" : "public, max-age=604800"
-    });
-    res.end(body);
+      "cache-control": cacheControl
+    };
+
+    if (textAsset && body.length > 1024) {
+      const accepted = String(req.headers["accept-encoding"] || "");
+      if (accepted.includes("br")) {
+        output = brotliCompressSync(body, {
+          params: { [zlibConstants.BROTLI_PARAM_QUALITY]: 4 }
+        });
+        headers["content-encoding"] = "br";
+        headers["vary"] = "Accept-Encoding";
+      } else if (accepted.includes("gzip")) {
+        output = gzipSync(body, { level: 6 });
+        headers["content-encoding"] = "gzip";
+        headers["vary"] = "Accept-Encoding";
+      }
+    }
+
+    headers["content-length"] = output.length;
+    res.writeHead(200, headers);
+    res.end(output);
   } catch {
     res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
     res.end("Not found");
@@ -467,6 +494,4 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(port, "0.0.0.0", () => {
   console.log(`Portfolio listening on ${port}`);
-  warmAIVideo().catch((error) => console.error("AI ad startup warmup failed:", error));
-  warmCartoonVideo().catch((error) => console.error("Cartoon startup warmup failed:", error));
 });

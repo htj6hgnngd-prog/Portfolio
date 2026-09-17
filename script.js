@@ -61,61 +61,6 @@ function unlockViewerScroll() {
   window.scrollTo(0, y);
 }
 
-function prepareCartoonPoster() {
-  const player = document.getElementById("ai-cartoon-player");
-  if (!player || player.dataset.posterPrepared === "1" || player.dataset.posterPreparing === "1") return;
-
-  player.dataset.posterPreparing = "1";
-  player.preload = "auto";
-
-  const capture = () => {
-    if (!player.videoWidth || !player.videoHeight) return;
-
-    try {
-      const maxWidth = 1280;
-      const scale = Math.min(1, maxWidth / player.videoWidth);
-      const canvas = document.createElement("canvas");
-      canvas.width = Math.round(player.videoWidth * scale);
-      canvas.height = Math.round(player.videoHeight * scale);
-      const context = canvas.getContext("2d", { alpha: false });
-      context.drawImage(player, 0, 0, canvas.width, canvas.height);
-      player.poster = canvas.toDataURL("image/jpeg", 0.9);
-      player.dataset.posterPrepared = "1";
-    } catch {
-      // Keep the server-provided fallback poster if canvas capture is unavailable.
-    }
-
-    player.dataset.posterPreparing = "0";
-    try { player.currentTime = 0; } catch {}
-  };
-
-  const seekToTitle = () => {
-    const titleTime = 1.5;
-    const safeTime = Number.isFinite(player.duration)
-      ? Math.min(titleTime, Math.max(0, player.duration - 0.1))
-      : titleTime;
-
-    const onSeeked = () => {
-      player.removeEventListener("seeked", onSeeked);
-      capture();
-    };
-
-    player.addEventListener("seeked", onSeeked, { once: true });
-    try {
-      player.currentTime = safeTime;
-    } catch {
-      player.dataset.posterPreparing = "0";
-    }
-  };
-
-  if (player.readyState >= 1) {
-    seekToTitle();
-  } else {
-    player.addEventListener("loadedmetadata", seekToTitle, { once: true });
-    player.load();
-  }
-}
-
 function restoreAIPlayer(key = activeAIKey) {
   if (!key || !aiWorks[key]) return;
   const work = aiWorks[key];
@@ -191,6 +136,14 @@ function renderAI(key) {
 
   if (activeAIKey && activeAIKey !== key) restoreAIPlayer(activeAIKey);
 
+  if (key === "cartoon") {
+    const cover = document.getElementById("cartoon-cover-img");
+    const coverSrc = cover?.currentSrc || cover?.src;
+    if (coverSrc) player.poster = coverSrc;
+  }
+  player.preload = "auto";
+  try { player.load(); } catch {}
+
   viewerType = "ai";
   activeAIKey = key;
   $("#viewer-title").textContent = work.title;
@@ -228,16 +181,6 @@ function closeViewer() {
 function moveVideo(direction) {
   if (viewerType !== "youtube") return;
   renderYoutube((activeVideo + direction + works.length) % works.length);
-}
-
-function prewarmAI(key) {
-  const work = aiWorks[key];
-  if (!work) return;
-  const player = document.getElementById(work.playerId);
-  if (!player || player.dataset.prewarmed === "1") return;
-  player.dataset.prewarmed = "1";
-  player.preload = "auto";
-  player.load();
 }
 
 $("#youtube-featured").addEventListener("click", () => renderYoutube(activeVideo));
@@ -282,28 +225,15 @@ function updateNav() {
   navButtons.forEach((button) => button.classList.toggle("is-active", button.dataset.target === current));
 }
 
-const aiSection = $("#ai");
-if (aiSection && "IntersectionObserver" in window) {
-  const observer = new IntersectionObserver((entries, instance) => {
-    if (entries.some((entry) => entry.isIntersecting)) {
-      prewarmAI("cartoon");
-      prewarmAI("ad");
-      instance.disconnect();
-    }
-  }, { rootMargin: "1800px 0px" });
-  observer.observe(aiSection);
-}
-
-prepareCartoonPoster();
-
-window.addEventListener("load", () => {
-  if (!navigator.connection?.saveData) {
-    setTimeout(() => prewarmAI("cartoon"), 80);
-    setTimeout(() => prewarmAI("ad"), 180);
-  }
-}, { once: true });
-
-window.addEventListener("scroll", updateNav, { passive: true });
+let navFrame = 0;
+window.addEventListener("scroll", () => {
+  if (navFrame) return;
+  navFrame = requestAnimationFrame(() => {
+    navFrame = 0;
+    updateNav();
+  });
+}, { passive: true });
+window.addEventListener("resize", updateNav, { passive: true });
 window.addEventListener("pageshow", resetViewer);
 window.addEventListener("pagehide", resetViewer);
 

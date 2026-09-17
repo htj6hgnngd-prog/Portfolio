@@ -2,6 +2,13 @@
   const section = document.getElementById("product");
   if (!section) return;
 
+  if (!document.querySelector('link[href^="/product-demo.css"]')) {
+    const stylesheet = document.createElement("link");
+    stylesheet.rel = "stylesheet";
+    stylesheet.href = "/product-demo.css?v=3";
+    document.head.appendChild(stylesheet);
+  }
+
   section.classList.remove("is-pending", "product-case-section");
   section.classList.add("product-demo-section");
   section.innerHTML = `

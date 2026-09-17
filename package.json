@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node verify-cover.js && node prepare-event-media.js && node server-proxy.js"
+    "start": "node prepare-event-media.js && node server-proxy.js"
   },
   "dependencies": {
     "ffmpeg-static": "^5.2.0"

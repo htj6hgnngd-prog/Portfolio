@@ -9,15 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://i.ytimg.com">
-  <link rel="preconnect" href="https://www.youtube-nocookie.com">
-  <link rel="preconnect" href="https://adobeprod-a.akamaihd.net" crossorigin>
-  <link rel="preconnect" href="https://cloud-api.yandex.net" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=8" />
-  <link rel="stylesheet" href="/hotfix.css?v=13" />
-  <link rel="stylesheet" href="/ai.css?v=8" />
-  <link rel="stylesheet" href="/site-case.css?v=3" />
-  <link rel="stylesheet" href="/product-demo.css?v=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Inter+Tight:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/core.css?v=1" />
 </head>
 <body>
   <header class="top-navigation">
@@ -83,8 +76,8 @@
       <div class="section-content ai-cases">
         <button class="featured-work ai-work ai-work--primary" id="ai-cartoon-featured" type="button" data-ai-work="cartoon" aria-label="Смотреть мультфильм">
           <span class="media-frame ai-media-frame" id="ai-cartoon-home">
-            <video id="ai-cartoon-player" class="ai-native-video" src="/media/cartoon-video" preload="metadata" muted playsinline webkit-playsinline disablepictureinpicture aria-hidden="true" tabindex="-1"></video>
-            <img id="cartoon-cover-img" class="cartoon-cover-img" alt="" fetchpriority="high" decoding="async">
+            <video id="ai-cartoon-player" class="ai-native-video" src="/media/cartoon-video" preload="none" muted playsinline webkit-playsinline disablepictureinpicture aria-hidden="true" tabindex="-1"></video>
+            <img id="cartoon-cover-img" class="cartoon-cover-img" src="/cartoon-cover.svg?v=1" alt="" loading="lazy" fetchpriority="low" decoding="async">
             <span class="play-mark"><span>▶</span></span>
           </span>
           <span class="work-meta"><strong>МУЛЬТФИЛЬМ</strong><span>ПОЛНЫЙ АВТОРСКИЙ ЦИКЛ</span></span>
@@ -93,7 +86,7 @@
 
         <button class="featured-work ai-work ai-work--secondary" id="ai-ad-featured" type="button" data-ai-work="ad" aria-label="Смотреть рекламу для маркетплейса">
           <span class="media-frame ai-media-frame" id="ai-ad-home">
-            <video id="ai-ad-player" class="ai-native-video" src="/media/ai-video" poster="/media/ai-poster" preload="auto" muted playsinline webkit-playsinline disablepictureinpicture aria-hidden="true" tabindex="-1"></video>
+            <video id="ai-ad-player" class="ai-native-video" src="/media/ai-video" poster="/media/ai-poster" preload="none" muted playsinline webkit-playsinline disablepictureinpicture aria-hidden="true" tabindex="-1"></video>
             <span class="ai-cover" aria-hidden="true"></span><span class="play-mark"><span>▶</span></span>
           </span>
           <span class="work-meta"><strong>РЕКЛАМА ТОВАРА ДЛЯ МАРКЕТПЛЕЙСА</strong><span>ПОЛНЫЙ АВТОРСКИЙ ЦИКЛ</span></span>
@@ -129,11 +122,9 @@
     </div>
   </div>
 
-  <script src="/cover-loader.js?v=1" defer></script>
-  <script src="/script.js?v=9" defer></script>
+  <script src="/script.js?v=10" defer></script>
   <script src="/modal-fix.js?v=1" defer></script>
-  <script src="/event-video.js?v=3" defer></script>
-  <script src="/site-case.js?v=3" defer></script>
-  <script src="/product-demo.js?v=1" defer></script>
+  <script src="/event-video.js?v=4" defer></script>
+  <script src="/section-loader.js?v=1" defer></script>
 </body>
 </html>

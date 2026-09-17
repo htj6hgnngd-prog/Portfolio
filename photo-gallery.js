@@ -34,12 +34,12 @@
     </div>
     <div class="section-content photo-content">
       <button class="photo-hero" type="button" data-photo-index="0" aria-label="Открыть фотографию 1 из 10">
-        <img src="${photos[0].src}" alt="${photos[0].alt}" fetchpriority="high" decoding="async">
+        <img src="${photos[0].src}" alt="${photos[0].alt}" loading="lazy" fetchpriority="low" decoding="async">
       </button>
       <div class="photo-grid" aria-label="Фотографии">
         ${photos.slice(1).map((photo, index) => `
           <button class="photo-card" type="button" data-photo-index="${index + 1}" aria-label="Открыть фотографию ${index + 2} из ${photos.length}">
-            <img src="${photo.src}" alt="${photo.alt}" loading="lazy" decoding="async">
+            <img src="${photo.src}" alt="${photo.alt}" loading="lazy" fetchpriority="low" decoding="async">
           </button>`).join("")}
       </div>
     </div>
