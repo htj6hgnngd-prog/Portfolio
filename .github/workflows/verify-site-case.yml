@@ -1,4 +1,5 @@
 name: Verify production site case
+# rerun after autoplay visibility fix
 
 on:
   push:
@@ -69,7 +70,7 @@ jobs:
             assert.equal(basics.fakeDemoBlocks, 0, `${name}: recreated/fake site blocks still exist`);
             assert.ok(basics.liveHref.startsWith('https://denisovphoto.ru/'), `${name}: live link is wrong`);
             assert.ok(basics.scrollWidth <= basics.viewportWidth + 2, `${name}: horizontal page overflow ${basics.scrollWidth}/${basics.viewportWidth}`);
-            assert.ok(Math.abs(basics.screenWidth - basics.imageWidth) <= 2, `${name}: captured site is not fitted 1:1 proportionally inside browser frame`);
+            assert.ok(Math.abs(basics.screenWidth - basics.imageWidth) <= 2, `${name}: captured site is not fitted proportionally inside browser frame`);
 
             const transformBefore = await page.locator('.site-case-capture').evaluate(el => getComputedStyle(el).transform);
             await page.waitForTimeout(6200);
