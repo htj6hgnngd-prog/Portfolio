@@ -9,7 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/styles.css?v=5" />
+  <link rel="stylesheet" href="/hotfix.css?v=5" />
 </head>
 <body>
   <header class="top-navigation">
@@ -78,7 +79,7 @@
     </section>
   </main>
 
-  <div class="viewer" id="viewer" hidden role="dialog" aria-modal="true" aria-label="Просмотр видео">
+  <div class="viewer" id="viewer" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-label="Просмотр видео">
     <div class="viewer-shell">
       <div class="viewer-header">
         <div class="viewer-title"><strong id="viewer-title"></strong><span id="viewer-role"></span></div>
@@ -89,6 +90,6 @@
     </div>
   </div>
 
-  <script src="/script.js" defer></script>
+  <script src="/script.js?v=5" defer></script>
 </body>
 </html>
