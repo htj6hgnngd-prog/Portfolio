@@ -464,6 +464,15 @@ const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host}`);
 
+    if (url.pathname === "/health") {
+      res.writeHead(200, {
+        "content-type": "text/plain; charset=utf-8",
+        "cache-control": "no-store"
+      });
+      res.end("ok");
+      return;
+    }
+
     const coverFallbackUrl = EVENT_COVER_FALLBACKS[url.pathname];
     if (coverFallbackUrl) {
       const localCover = path.join(root, url.pathname.slice(1));
