@@ -210,30 +210,21 @@
     reset();
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
-    if (!(await sleep(2600, token))) return;
-
     // Спокойный непрерывный проход от главной к портфолио.
     moveCursor(1080, 610);
-    if (!(await sleep(1400, token))) return;
     scrollToFraction(.50, 13500);
 
-    if (!(await sleep(15000, token))) return;
+    if (!(await sleep(13500, token))) return;
 
-    // Пауза непосредственно на реальном блоке портфолио — без открытия фото.
-    cursor.classList.remove("is-visible");
-    if (!(await sleep(4200, token))) return;
-
-    // Продолжаем реальный сайт до нижних блоков и формы.
+    // Без остановки продолжаем реальный сайт до нижних блоков и формы.
     moveCursor(1060, 610);
-    if (!(await sleep(1400, token))) return;
     scrollToFraction(1, 16500);
 
-    if (!(await sleep(18200, token))) return;
+    if (!(await sleep(16500, token))) return;
 
     cursor.classList.remove("is-visible");
-    if (!(await sleep(1800, token))) return;
-
     openForm();
+
     if (!(await fillForm(token))) return;
 
     if (visible && token === run) sequence(token);
