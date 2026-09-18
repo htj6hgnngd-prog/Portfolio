@@ -60,3 +60,5 @@
 @media(max-width:900px){.dai-stage{min-height:0}.dai-browser{overflow:hidden}}
 
 .dai-browser{box-shadow:none!important}
+
+.dai-browser{contain:paint}
