@@ -26,7 +26,8 @@
             '<div class="site-live-viewport">',
               '<img class="site-long-page" src="/assets/site-case/denisovphoto-desktop.png?v=1" alt="Denisov Photo desktop website" decoding="async">',
 
-              '<button class="site-portfolio-hotspot" type="button" aria-label="Открыть свадебную историю"></button>',\n              '<div class="site-photo-viewer" aria-hidden="true">',
+              '<button class="site-portfolio-hotspot" type="button" aria-label="Открыть свадебную историю"></button>',
+              '<div class="site-photo-viewer" aria-hidden="true">',
                 '<button type="button" class="site-photo-close">×</button>',
                 '<img src="https://static.tildacdn.com/tild3137-6338-4162-b735-363931303032/30.jpg" alt="Свадебный кадр Denisov Photo">',
                 '<div class="site-photo-meta"><span>СВАДЕБНАЯ ИСТОРИЯ</span><strong>DENISOV PHOTO</strong></div>',
