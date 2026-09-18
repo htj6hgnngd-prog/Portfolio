@@ -109,3 +109,20 @@
 .site-photo-meta strong{font-size:12px}
 .site-long-page{transition-timing-function:cubic-bezier(.22,1,.36,1)!important}
 @media(max-width:900px){.site-photo-viewer{padding:28px}.site-photo-close{top:18px;right:18px}.site-photo-meta{left:24px;bottom:20px}}
+
+
+/* v8 — clean framing + semantic cursor target */
+.site-browser{box-shadow:none!important}
+.site-portfolio-hotspot{
+  position:absolute;
+  z-index:18;
+  left:7%;
+  top:13%;
+  width:54%;
+  height:68%;
+  border:0;
+  padding:0;
+  background:transparent;
+  opacity:0;
+  pointer-events:none;
+}
