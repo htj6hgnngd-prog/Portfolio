@@ -442,6 +442,24 @@ function serveVideoFile(req, res, file, total) {
   return createReadStream(file, { start: range.start, end: range.end }).pipe(res);
 }
 
+async function warmRemoteMetadata() {
+  const tasks = [
+    resolveAIMedia(),
+    resolveCartoonMeta(),
+    resolveCartoonDownload(),
+    resolveYandexMeta(EVENT_MEDIA.promo1.publicUrl),
+    resolveYandexMeta(EVENT_MEDIA.promo2.publicUrl)
+  ];
+
+  const results = await Promise.allSettled(tasks);
+  const failed = results.filter((item) => item.status === "rejected").length;
+  if (failed) {
+    console.warn(`Remote metadata warmup completed with ${failed} failure(s)`);
+  } else {
+    console.log("Remote media metadata warmed");
+  }
+}
+
 const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host}`);
@@ -619,4 +637,7 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(port, "0.0.0.0", () => {
   console.log(`Portfolio listening on ${port}`);
+  setTimeout(() => {
+    warmRemoteMetadata().catch((error) => console.warn("Remote metadata warmup failed:", error.message));
+  }, 3000).unref();
 });
