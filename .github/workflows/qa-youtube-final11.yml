@@ -1,0 +1,70 @@
+name: QA YouTube visible-init
+on:
+  push:
+    branches: ['qa-youtube-final11-1789704960324']
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - run: |
+          npm install --no-save playwright@1.55.0
+          google-chrome --version
+      - name: Verify first-open YouTube sequence
+        run: |
+          cat > qa.cjs <<'NODE'
+          const { chromium }=require('playwright');
+          const assert=require('node:assert/strict');
+          const url='https://portfolio-main-production-fdd5.up.railway.app/';
+          const build='20260918-final11';
+          const ids=['pPTTScpvxMA','RBRXIkmQUJI','FhwHKvgYwGo'];
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          async function waitBuild(){for(let i=0;i<100;i++){try{const r=await fetch(url,{cache:'no-store'}),h=await r.text();if(r.ok&&h.includes('portfolio-build" content="'+build+'"'))return}catch{}await sleep(3000)}throw Error('production timeout')}
+          (async()=>{
+            await waitBuild();
+            const b=await chromium.launch({channel:'chrome',headless:true});
+            const p=await b.newPage({viewport:{width:1440,height:1000}});
+            const errors=[];p.on('pageerror',e=>errors.push(e.message));
+            await p.goto(url,{waitUntil:'domcontentloaded',timeout:120000});
+            await p.evaluate(()=>{
+              window.__ytInsertStates=[];
+              const target=document.querySelector('#viewer-frame');
+              new MutationObserver(()=>{
+                const iframe=target.querySelector('iframe');
+                if(!iframe)return;
+                const viewer=document.querySelector('#viewer');
+                window.__ytInsertStates.push({
+                  open:viewer.classList.contains('is-open'),
+                  hidden:viewer.hidden,
+                  display:getComputedStyle(viewer).display,
+                  src:iframe.src
+                });
+              }).observe(target,{childList:true});
+            });
+            for(let i=0;i<3;i++){
+              await p.locator('.work-thumb').nth(i).click();
+              await p.waitForSelector('#viewer.is-open iframe',{timeout:20000});
+              await p.waitForTimeout(1800);
+              const state=await p.evaluate(()=>window.__ytInsertStates.at(-1));
+              console.log('INSERT',i,state);
+              assert.equal(state.open,true);
+              assert.equal(state.hidden,false);
+              assert.notEqual(state.display,'none');
+              assert.ok(state.src.includes('/embed/'+ids[i]));
+              const frame=p.frames().find(f=>f.url().includes('/embed/'+ids[i]));
+              if(frame){
+                const text=(await frame.locator('body').innerText().catch(()=>''))||'';
+                console.log('FRAME',ids[i],frame.url(),text.slice(0,500).replace(/\n/g,' | '));
+                assert.ok(!/video unavailable|this video is unavailable|видео недоступно/i.test(text),'unavailable '+ids[i]);
+              }
+              await p.locator('#viewer-close').click();
+              await p.waitForSelector('#viewer',{state:'hidden'});
+            }
+            assert.deepEqual(errors,[]);
+            await b.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+          node qa.cjs
