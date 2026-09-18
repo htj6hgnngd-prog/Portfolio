@@ -2,7 +2,6 @@
   const section = document.getElementById("product");
   if (!section) return;
 
-  section.classList.remove("is-pending", "product-showcase");
   section.classList.add("product-web-demo");
 
   section.innerHTML = [
