@@ -9,6 +9,8 @@ import { brotliCompressSync, gzipSync, constants as zlibConstants } from "node:z
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const port = Number(process.env.PORT || 3000);
+const SITE_CAPTURE_WEBP = "/tmp/portfolio-denisovphoto-desktop.webp";
+const SITE_CAPTURE_PNG = path.join(root, "assets", "site-case", "denisovphoto-desktop.png");
 
 const AI_ID = "5-9tzVe57JY";
 const ADOBE_EMBED = `https://www-ccv.adobe.io/v1/player/ccv/${AI_ID}/embed?api_key=behance1&bgcolor=%23191919`;
@@ -260,6 +262,30 @@ async function warmCartoonVideo() {
   }
 }
 
+async function serveSiteCapture(req, res) {
+  let file = SITE_CAPTURE_WEBP;
+  let contentType = "image/webp";
+  let cacheControl = "public, max-age=31536000, immutable";
+
+  try {
+    await stat(file);
+  } catch {
+    file = SITE_CAPTURE_PNG;
+    contentType = "image/png";
+    cacheControl = "no-store, max-age=0";
+  }
+
+  const info = await stat(file);
+  res.writeHead(200, {
+    "content-type": contentType,
+    "content-length": info.size,
+    "cache-control": cacheControl
+  });
+
+  if (req.method === "HEAD") return res.end();
+  createReadStream(file).pipe(res);
+}
+
 async function streamRemoteVideo(req, res, href, contentType = "video/mp4") {
   const headers = {
     accept: "*/*",
@@ -379,6 +405,11 @@ function serveVideoFile(req, res, file, total) {
 const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host}`);
+
+    if (url.pathname === "/media/site-capture") {
+      await serveSiteCapture(req, res);
+      return;
+    }
 
     if (url.pathname === "/media/ai-video") {
       try {
