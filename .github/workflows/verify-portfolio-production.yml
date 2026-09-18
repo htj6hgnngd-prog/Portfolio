@@ -17,7 +17,7 @@ jobs:
       - name: Real browser capture
         run: |
           cat > verify.cjs <<'NODE'
-          const { chromium }=require('playwright');const assert=require('node:assert/strict');const fs=require('node:fs');const url='https://portfolio-main-production-fdd5.up.railway.app/';const build='20260918-final6';
+          const { chromium }=require('playwright');const assert=require('node:assert/strict');const fs=require('node:fs');const url='https://portfolio-main-production-fdd5.up.railway.app/';const build='20260918-final7';
           const sleep=ms=>new Promise(r=>setTimeout(r,ms));
           async function wait(){for(let i=0;i<60;i++){try{const r=await fetch(url,{cache:'no-store'}),h=await r.text();if(r.ok&&h.includes('portfolio-build" content="'+build+'"'))return}catch{}await sleep(5000)}throw Error('production timeout')}
           async function scroll(page){const h=await page.evaluate(()=>document.documentElement.scrollHeight);for(let y=0;y<h;y+=650){await page.evaluate(v=>scrollTo(0,v),y);await page.waitForTimeout(100)}await page.evaluate(()=>scrollTo(0,0));await page.waitForTimeout(800)}
