@@ -12,7 +12,8 @@
 .dai-appnav{display:flex;gap:6px;padding:5px;border:1px solid #25303d;border-radius:13px;background:#0c1219}
 .dai-appnav button{border:0;border-radius:9px;padding:12px 18px;color:#7f8b9a;background:transparent;font-size:14px;font-weight:760;cursor:pointer}
 .dai-appnav button.is-active{color:#fff;background:#192436}
-.dai-appstatus{justify-self:end;color:#8995a4;font-size:12px}.dai-appstatus i,.dai-live i{display:inline-block;width:8px;height:8px;margin-right:7px;border-radius:50%;background:#47d5a0;box-shadow:0 0 0 5px rgba(71,213,160,.09)}
+.dai-appstatus{justify-self:end;color:#8995a4;font-size:12px}.dai-appstatus i,
+.dai-live i{display:inline-block;width:8px;height:8px;margin-right:7px;border-radius:50%;background:#47d5a0;box-shadow:0 0 0 5px rgba(71,213,160,.09)}
 .dai-workspace{position:relative;height:818px}
 .dai-page{position:absolute;inset:0;padding:48px 56px 54px;opacity:0;visibility:hidden;transform:translateY(12px);transition:opacity .38s ease,transform .48s cubic-bezier(.22,1,.36,1),visibility .38s step-end;pointer-events:none}
 .dai-page.is-active{opacity:1;visibility:visible;transform:none;transition:opacity .38s ease,transform .48s cubic-bezier(.22,1,.36,1),visibility 0s;pointer-events:auto}
@@ -30,7 +31,13 @@
 .dai-cursor{position:absolute;z-index:80;top:0;left:0;width:30px;height:42px;opacity:0;transition:transform 1.35s cubic-bezier(.22,1,.36,1),opacity .25s ease;pointer-events:none;filter:drop-shadow(0 3px 5px rgba(0,0,0,.6))}.dai-cursor::before{content:"";position:absolute;inset:0;background:#fff;clip-path:polygon(0 0,0 100%,29% 72%,44% 100%,60% 91%,44% 65%,79% 65%)}.dai-cursor::after{content:"";position:absolute;width:14px;height:14px;top:2px;left:2px;border:3px solid #718cf5;border-radius:50%;opacity:0;transform:scale(.25)}.dai-cursor.is-visible{opacity:1}.dai-cursor.is-clicking::after{animation:dai-click .42s ease-out}
 @keyframes dai-spin{to{transform:rotate(360deg)}}@keyframes dai-blink{50%{opacity:0}}@keyframes dai-click{0%{opacity:0;transform:scale(.25)}30%{opacity:1}100%{opacity:0;transform:scale(3.2)}}
 @media(max-width:900px){.product-web-demo{padding-top:34px!important;padding-bottom:42px!important}.dai-browser{border-radius:9px}.dai-browser-bar{height:30px;grid-template-columns:64px 1fr 86px;padding:0 7px}.dai-browser-dots{gap:3px}.dai-browser-dots i{width:5px;height:5px}.dai-browser-address{font-size:6px}.dai-browser-demo{font-size:5.5px}.dai-browser-demo i{width:4px;height:4px;margin-right:3px}}
-@media(prefers-reduced-motion:reduce){.dai-page,.dai-analysis-line,.dai-agent-answer,.dai-success,.dai-cursor{transition:none!important}.dai-analysis-line i,.dai-typing-caret,.dai-cursor::after{animation:none!important}}
+@media(prefers-reduced-motion:reduce){.dai-page,
+.dai-analysis-line,
+.dai-agent-answer,
+.dai-success,
+.dai-cursor{transition:none!important}.dai-analysis-line i,
+.dai-typing-caret,
+.dai-cursor::after{animation:none!important}}
 
 /* v4 — agent-first desktop flow */
 .dai-agent-page{padding:0!important}
@@ -49,7 +56,8 @@
 .dai-agent-review{position:absolute;left:50%;bottom:44px;width:min(920px,84%);padding:18px 20px;border:1px solid #273442;border-radius:16px;background:#0a1119;box-shadow:0 22px 52px rgba(0,0,0,.24);opacity:0;transform:translate(-50%,20px);transition:opacity .35s ease,transform .45s cubic-bezier(.22,1,.36,1)}
 .dai-agent-review.is-visible{opacity:1;transform:translate(-50%,0)}
 .dai-agent-review.is-visible~*{}
-.dai-review-state{display:flex;align-items:center;justify-content:space-between;gap:22px}.dai-review-state>div>span,.dai-review-result>span{color:#718cf5;font-size:9px;font-weight:800;letter-spacing:.08em}.dai-review-state strong{display:block;margin:6px 0 4px;font-size:16px}.dai-review-state p{margin:0;color:#7b8797;font-size:10px}.dai-review-state>em{display:flex;align-items:center;gap:8px;color:#7f8b9b;font-size:10px;font-style:normal}.dai-review-state>em i{width:12px;height:12px;border:2px solid #344152;border-top-color:#718cf5;border-radius:50%;animation:dai-spin .85s linear infinite}
+.dai-review-state{display:flex;align-items:center;justify-content:space-between;gap:22px}.dai-review-state>div>span,
+.dai-review-result>span{color:#718cf5;font-size:9px;font-weight:800;letter-spacing:.08em}.dai-review-state strong{display:block;margin:6px 0 4px;font-size:16px}.dai-review-state p{margin:0;color:#7b8797;font-size:10px}.dai-review-state>em{display:flex;align-items:center;gap:8px;color:#7f8b9b;font-size:10px;font-style:normal}.dai-review-state>em i{width:12px;height:12px;border:2px solid #344152;border-top-color:#718cf5;border-radius:50%;animation:dai-spin .85s linear infinite}
 .dai-review-progress{height:3px;margin-top:14px;overflow:hidden;border-radius:999px;background:#18212c}.dai-review-progress i{display:block;width:14%;height:100%;border-radius:inherit;background:#718cf5;transition:width 1.6s cubic-bezier(.22,1,.36,1)}.dai-agent-review.is-complete .dai-review-progress i{width:100%}
 .dai-review-result{display:flex;align-items:center;gap:14px;margin-top:15px;padding-top:14px;border-top:1px solid #202b37;opacity:0;transform:translateY(8px);transition:.3s ease}.dai-review-result.is-visible{opacity:1;transform:none}.dai-review-result strong{flex:1;font-size:13px}.dai-review-result button{border:1px solid #42578a;border-radius:9px;padding:9px 12px;background:#17223a;color:#c9d5ff;font-size:10px;font-weight:760;cursor:pointer}
 .dai-agent-review.is-visible+.nothing{display:none}
