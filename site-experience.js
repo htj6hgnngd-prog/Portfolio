@@ -25,14 +25,6 @@
           '<div class="site-canvas">',
             '<div class="site-live-viewport">',
               '<img class="site-long-page" src="/assets/site-case/denisovphoto-desktop.png?v=1" alt="Denisov Photo desktop website" decoding="async">',
-
-              '<button class="site-portfolio-hotspot" type="button" aria-label="Открыть свадебную историю"></button>',
-              '<div class="site-photo-viewer" aria-hidden="true">',
-                '<button type="button" class="site-photo-close">×</button>',
-                '<img src="https://static.tildacdn.com/tild3137-6338-4162-b735-363931303032/30.jpg" alt="Свадебный кадр Denisov Photo">',
-                '<div class="site-photo-meta"><span>СВАДЕБНАЯ ИСТОРИЯ</span><strong>DENISOV PHOTO</strong></div>',
-              '</div>',
-
               '<div class="site-form-overlay" aria-hidden="true">',
                 '<div class="site-form-card">',
                   '<button type="button" class="site-form-close">×</button>',
@@ -65,9 +57,6 @@
   const canvas = section.querySelector(".site-canvas");
   const page = section.querySelector(".site-long-page");
   const cursor = section.querySelector(".site-cursor");
-  const hotspot = section.querySelector(".site-portfolio-hotspot");
-  const viewer = section.querySelector(".site-photo-viewer");
-  const viewerClose = section.querySelector(".site-photo-close");
   const form = section.querySelector(".site-form-overlay");
   const formClose = section.querySelector(".site-form-close");
   const consent = section.querySelector(".site-consent");
@@ -81,7 +70,7 @@
     date: section.querySelector('[data-demo-field="date"]')
   };
 
-  if (!browser || !stage || !canvas || !page || !cursor || !hotspot || !viewer || !form || !submit || !formSuccess) return;
+  if (!browser || !stage || !canvas || !page || !cursor || !form || !submit || !formSuccess) return;
 
   let scale = 1;
   let visible = false;
@@ -133,16 +122,6 @@
     cursor.classList.add("is-clicking");
   }
 
-  function openViewer() {
-    viewer.classList.add("is-open");
-    viewer.setAttribute("aria-hidden", "false");
-  }
-
-  function closeViewer() {
-    viewer.classList.remove("is-open");
-    viewer.setAttribute("aria-hidden", "true");
-  }
-
   function openForm() {
     form.classList.add("is-open");
     form.setAttribute("aria-hidden", "false");
@@ -172,8 +151,6 @@
   function reset() {
     page.style.transitionDuration = "0ms";
     page.style.transform = "translate3d(0,0,0)";
-
-    closeViewer();
     closeForm();
 
     consent.classList.remove("is-checked");
@@ -235,45 +212,32 @@
 
     if (!(await sleep(2600, token))) return;
 
-    // Один непрерывный проход по реальной странице к портфолио.
+    // Спокойный непрерывный проход от главной к портфолио.
     moveCursor(1080, 610);
-    if (!(await sleep(1200, token))) return;
-    scrollToFraction(.52, 12500);
+    if (!(await sleep(1400, token))) return;
+    scrollToFraction(.50, 13500);
 
-    if (!(await sleep(13800, token))) return;
+    if (!(await sleep(15000, token))) return;
 
-    // Просмотр одного реального свадебного кадра. Курсор всегда попадает в hotspot.
-    moveCursorTo(hotspot, .48, .48);
-    if (!(await sleep(1500, token))) return;
-    clickCursor();
-    openViewer();
-
+    // Пауза непосредственно на реальном блоке портфолио — без открытия фото.
+    cursor.classList.remove("is-visible");
     if (!(await sleep(4200, token))) return;
 
-    moveCursorTo(viewerClose, .5, .5);
-    if (!(await sleep(1350, token))) return;
-    clickCursor();
-    closeViewer();
-
+    // Продолжаем реальный сайт до нижних блоков и формы.
+    moveCursor(1060, 610);
     if (!(await sleep(1400, token))) return;
+    scrollToFraction(1, 16500);
 
-    // Длинный плавный просмотр оставшейся части сайта без случайных остановок.
-    scrollToFraction(1, 15500);
+    if (!(await sleep(18200, token))) return;
 
-    if (!(await sleep(17000, token))) return;
-
-    // На финальной форме не имитируем клик в выдуманный CTA: клиент уже дошёл до формы.
     cursor.classList.remove("is-visible");
     if (!(await sleep(1800, token))) return;
-    openForm();
 
+    openForm();
     if (!(await fillForm(token))) return;
 
     if (visible && token === run) sequence(token);
   }
-
-  hotspot.addEventListener("click", openViewer);
-  viewerClose.addEventListener("click", closeViewer);
   formClose.addEventListener("click", closeForm);
 
   consent.addEventListener("click", () => {
