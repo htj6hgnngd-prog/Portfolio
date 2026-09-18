@@ -1,0 +1,40 @@
+name: QA layout geometry
+on:
+  push:
+    branches: ['qa-layout-1789707655977']
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - run: npm install --no-save playwright@1.55.0
+      - name: Measure production geometry
+        run: |
+          cat > qa.cjs <<'NODE'
+          const {chromium}=require('playwright');
+          (async()=>{
+            const b=await chromium.launch({channel:'chrome',headless:true});
+            const p=await b.newPage({viewport:{width:1440,height:1000},reducedMotion:'reduce'});
+            await p.goto('https://portfolio-main-production-fdd5.up.railway.app/',{waitUntil:'networkidle',timeout:120000});
+            for(let y=0;y<await p.evaluate(()=>document.documentElement.scrollHeight);y+=600){await p.evaluate(v=>scrollTo(0,v),y);await p.waitForTimeout(80)}
+            await p.waitForTimeout(500);
+            const data=await p.evaluate(()=>{
+              const rect=el=>{const r=el?.getBoundingClientRect();return r&&{x:r.x,y:r.y,w:r.width,h:r.height,b:r.bottom}};
+              const style=el=>el&&{height:getComputedStyle(el).height,width:getComputedStyle(el).width,position:getComputedStyle(el).position,display:getComputedStyle(el).display,transform:getComputedStyle(el).transform};
+              const product=document.querySelector('#product'),site=document.querySelector('#site');
+              return {
+                scrollHeight:document.documentElement.scrollHeight,
+                bodyHeight:document.body.getBoundingClientRect().height,
+                product:{section:rect(product),content:rect(product?.querySelector('.section-content')),browser:rect(product?.querySelector('.dai-browser')),stage:rect(product?.querySelector('.dai-stage')),canvas:rect(product?.querySelector('.dai-canvas')),stageStyle:style(product?.querySelector('.dai-stage')),canvasStyle:style(product?.querySelector('.dai-canvas'))},
+                site:{section:rect(site),content:rect(site?.querySelector('.section-content')),browser:rect(site?.querySelector('.site-browser')),stage:rect(site?.querySelector('.site-stage')),canvas:rect(site?.querySelector('.site-canvas')),stageStyle:style(site?.querySelector('.site-stage')),canvasStyle:style(site?.querySelector('.site-canvas'))},
+                main:rect(document.querySelector('main'))
+              };
+            });
+            console.log('GEOMETRY',JSON.stringify(data));
+            await b.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+          node qa.cjs
