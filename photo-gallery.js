@@ -1,15 +1,15 @@
 (() => {
   const photos = [
-    { src: "/assets/photos/reportage-01.jpg", alt: "Репортажный кадр пространства", ratio: 1418 / 1056 },
-    { src: "/assets/photos/reportage-06.jpg", alt: "Гости мероприятия", ratio: 1536 / 1024 },
-    { src: "/assets/photos/reportage-09.jpg", alt: "Живой репортаж за столом", ratio: 1536 / 1024 },
-    { src: "/assets/photos/reportage-05.jpg", alt: "Детали оформления события", ratio: 1536 / 1024 },
-    { src: "/assets/photos/reportage-07.jpg", alt: "Композиционный кадр события", ratio: 1024 / 1536 },
-    { src: "/assets/photos/reportage-04.jpg", alt: "Динамичный репортажный кадр", ratio: 1536 / 1024 },
-    { src: "/assets/photos/reportage-08.jpg", alt: "Групповой репортажный портрет", ratio: 1536 / 1024 },
-    { src: "/assets/photos/reportage-02.jpg", alt: "Репортажный кадр на открытом воздухе", ratio: 1536 / 1024 },
-    { src: "/assets/photos/reportage-03.jpg", alt: "Портрет в пространстве", ratio: 1024 / 1536 },
-    { src: "/assets/photos/reportage-10.jpg", alt: "Портрет гостей", ratio: 1536 / 1024 }
+    { src: "/media/photos/reportage-01.jpg", alt: "Репортажный кадр пространства", ratio: 1418 / 1056 },
+    { src: "/media/photos/reportage-06.jpg", alt: "Гости мероприятия", ratio: 1536 / 1024 },
+    { src: "/media/photos/reportage-09.jpg", alt: "Живой репортаж за столом", ratio: 1536 / 1024 },
+    { src: "/media/photos/reportage-05.jpg", alt: "Детали оформления события", ratio: 1536 / 1024 },
+    { src: "/media/photos/reportage-07.jpg", alt: "Композиционный кадр события", ratio: 1024 / 1536 },
+    { src: "/media/photos/reportage-04.jpg", alt: "Динамичный репортажный кадр", ratio: 1536 / 1024 },
+    { src: "/media/photos/reportage-08.jpg", alt: "Групповой репортажный портрет", ratio: 1536 / 1024 },
+    { src: "/media/photos/reportage-02.jpg", alt: "Репортажный кадр на открытом воздухе", ratio: 1536 / 1024 },
+    { src: "/media/photos/reportage-03.jpg", alt: "Портрет в пространстве", ratio: 1024 / 1536 },
+    { src: "/media/photos/reportage-10.jpg", alt: "Портрет гостей", ratio: 1536 / 1024 }
   ];
 
   const section = document.getElementById("photo");
