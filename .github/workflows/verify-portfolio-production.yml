@@ -94,7 +94,11 @@ jobs:
             await page.locator('#product').scrollIntoViewIfNeeded();
             await page.waitForSelector('#product.product-demo-section .dai-demo-frame', { timeout: 30000 });
             const p1 = await page.locator('.product-demo-story-kicker').textContent();
-            await page.waitForTimeout(4000);
+            await page.waitForFunction(
+              (initial) => document.querySelector('.product-demo-story-kicker')?.textContent !== initial,
+              p1,
+              { timeout: 12000 }
+            );
             const p2 = await page.locator('.product-demo-story-kicker').textContent();
             assert.notEqual(p2, p1, 'Direct AI story animation did not advance');
 
