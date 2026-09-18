@@ -485,7 +485,7 @@ const server = http.createServer(async (req, res) => {
       }
     }
 
-    const photoMatch = url.pathname.match(/^\/media\/photos\/reportage-(\d{2})$/);
+    const photoMatch = url.pathname.match(/^\/media\/photos\/reportage-(\d{2})(?:\.jpg|\.webp)?$/);
     if (photoMatch) {
       await serveOptimizedPhoto(req, res, photoMatch[1]);
       return;
@@ -639,5 +639,5 @@ server.listen(port, "0.0.0.0", () => {
   console.log(`Portfolio listening on ${port}`);
   setTimeout(() => {
     warmRemoteMetadata().catch((error) => console.warn("Remote metadata warmup failed:", error.message));
-  }, 3000).unref();
+  }, 700).unref();
 });
