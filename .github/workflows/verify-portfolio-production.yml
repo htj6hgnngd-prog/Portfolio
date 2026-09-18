@@ -13,7 +13,7 @@ jobs:
         with: { node-version: 22 }
       - run: |
           npm install --no-save playwright@1.55.0
-          npx playwright install --with-deps chromium
+          google-chrome --version
       - name: Real browser capture
         run: |
           cat > verify.cjs <<'NODE'
@@ -21,7 +21,7 @@ jobs:
           const sleep=ms=>new Promise(r=>setTimeout(r,ms));
           async function wait(){for(let i=0;i<60;i++){try{const r=await fetch(url,{cache:'no-store'}),h=await r.text();if(r.ok&&h.includes('portfolio-build" content="'+build+'"'))return}catch{}await sleep(5000)}throw Error('production timeout')}
           async function scroll(page){const h=await page.evaluate(()=>document.documentElement.scrollHeight);for(let y=0;y<h;y+=650){await page.evaluate(v=>scrollTo(0,v),y);await page.waitForTimeout(100)}await page.evaluate(()=>scrollTo(0,0));await page.waitForTimeout(800)}
-          (async()=>{await wait();fs.mkdirSync('browser-preview',{recursive:true});const b=await chromium.launch({headless:true});const p=await b.newPage({viewport:{width:1440,height:1000},reducedMotion:'reduce'});await p.goto(url,{waitUntil:'networkidle',timeout:120000});await scroll(p);await p.waitForSelector('#product.product-web-demo .dai-browser');await p.waitForSelector('#site.site-client-demo .site-browser');await p.waitForSelector('#photo.photo-section',{state:'attached',timeout:30000});
+          (async()=>{await wait();fs.mkdirSync('browser-preview',{recursive:true});const b=await chromium.launch({channel:'chrome',headless:true});const p=await b.newPage({viewport:{width:1440,height:1000},reducedMotion:'reduce'});await p.goto(url,{waitUntil:'networkidle',timeout:120000});await scroll(p);await p.waitForSelector('#product.product-web-demo .dai-browser');await p.waitForSelector('#site.site-client-demo .site-browser');await p.waitForSelector('#photo.photo-section',{state:'attached',timeout:30000});
             const pageErrors=[];p.on('pageerror',e=>pageErrors.push(e.message));
             await p.locator('#youtube-featured').click();await p.waitForSelector('#viewer.is-open iframe');await p.locator('#viewer-close').click();await p.waitForSelector('#viewer',{state:'hidden'});
             await p.locator('[data-event-work="promo1"]').click();await p.waitForSelector('#viewer.is-open .event-viewer-video');await p.waitForFunction(()=>{const v=document.querySelector('#viewer .event-viewer-video');return v&&v.readyState>=1&&v.videoWidth>0&&!v.error});await p.locator('#viewer-close').click();await p.waitForSelector('#viewer',{state:'hidden'});
