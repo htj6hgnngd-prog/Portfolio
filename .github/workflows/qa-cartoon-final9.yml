@@ -12,7 +12,7 @@ jobs:
         with: { node-version: 22 }
       - run: |
           npm install --no-save playwright@1.55.0
-          npx playwright install --with-deps chromium
+          google-chrome --version || true
       - name: Verify real cartoon playback
         run: |
           cat > qa.cjs <<'NODE'
@@ -26,7 +26,7 @@ jobs:
               const bfr=Buffer.from(await r.arrayBuffer());
               console.log('RANGE',range,'STATUS',r.status,'HEADERS',JSON.stringify(Object.fromEntries(r.headers)),'HEX',bfr.subarray(0,32).toString('hex'),'LEN',bfr.length);
             }
-            const b=await chromium.launch({headless:true});
+            const b=await chromium.launch({channel:'chrome',headless:true});
             const p=await b.newPage({viewport:{width:1440,height:1000}});
             const responses=[];
             p.on('response',r=>{if(r.url().includes('cartoon.mp4'))responses.push({status:r.status(),headers:r.headers(),url:r.url()})});
