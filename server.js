@@ -65,6 +65,34 @@ async function resolveCartoon(){
   return cartoonDownload;
 }
 
+async function streamRemoteVideo(req,res,href,contentType="video/mp4"){
+  const headers={accept:"*/*","user-agent":"Mozilla/5.0 PortfolioStream/1.0"};
+  if(req.headers.range)headers.range=req.headers.range;
+  const response=await fetch(href,{redirect:"follow",headers});
+  if(!response.ok&&response.status!==206)throw new Error("Remote video "+response.status);
+  const outgoing={
+    "content-type":response.headers.get("content-type")||contentType,
+    "accept-ranges":response.headers.get("accept-ranges")||"bytes",
+    "cache-control":"public, max-age=3600"
+  };
+  const length=response.headers.get("content-length");
+  const range=response.headers.get("content-range");
+  if(length)outgoing["content-length"]=length;
+  if(range)outgoing["content-range"]=range;
+  res.writeHead(response.status===206?206:200,outgoing);
+  if(req.method==="HEAD"||!response.body)return res.end();
+  const reader=response.body.getReader();
+  const pump=async()=>{
+    for(;;){
+      const {done,value}=await reader.read();
+      if(done)break;
+      if(!res.write(Buffer.from(value)))await new Promise(resolve=>res.once("drain",resolve));
+    }
+    res.end();
+  };
+  try{await pump()}catch(error){try{reader.cancel()}catch{}throw error}
+}
+
 function redirect(res,location,cacheControl="no-store"){
   res.writeHead(302,{location,"cache-control":cacheControl});
   res.end();
@@ -158,7 +186,7 @@ const server=http.createServer(async(req,res)=>{
       if(!poster)throw new Error("AI poster missing");
       return redirect(res,poster,"public, max-age=300");
     }
-    if(url.pathname==="/media/cartoon-video")return redirect(res,await resolveCartoon());
+    if(url.pathname==="/media/cartoon-video")return await streamRemoteVideo(req,res,await resolveCartoon(),"video/mp4");
 
     const requested=decodeURIComponent(url.pathname==="/"?"/index.html":url.pathname);
     const normalized=path.normalize(requested).replace(/^(\.\.(\/|\\|$))+/,"");
