@@ -39,12 +39,12 @@
   }
 
   near("photo", 1200, () => import("/photo-gallery.js?v=6"));
-  near("product", 1700, async () => {
-    await loadStyle("/product-demo.css?v=5");
-    await import("/product-demo.js?v=6");
+  near("product", 1900, async () => {
+    await loadStyle("/product-experience.css?v=1");
+    await import("/product-experience.js?v=1");
   });
-  near("site", 1900, async () => {
-    await loadStyle("/site-case.css?v=5");
-    await import("/site-case.js?v=5");
+  near("site", 2100, async () => {
+    await loadStyle("/site-experience.css?v=1");
+    await import("/site-experience.js?v=1");
   });
 })();
