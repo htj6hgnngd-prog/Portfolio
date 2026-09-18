@@ -86,7 +86,7 @@ jobs:
 
             assert.ok(initial.scrollWidth <= initial.viewport + 2, `desktop horizontal overflow ${initial.scrollWidth}/${initial.viewport}`);
             assert.ok(initial.stylesheets.some(h => h.includes('/core.css?v=3')), 'core stylesheet missing');
-            assert.ok(initial.stylesheets.some(h => h.includes('/design.css?v=2')), 'premium design stylesheet missing');
+            assert.ok(initial.stylesheets.some(h => h.includes('/design.css?v=3')), 'premium design stylesheet missing');
             assert.equal(initial.stylesheets.filter(h => /\/(styles|hotfix|ai)\.css/.test(h)).length, 0, 'old blocking stylesheets still loaded');
             initial.rects.forEach(r => {
               assert.ok(r.paddingTop >= 60, `${r.id}: unsafe top spacing ${r.paddingTop}`);
@@ -147,10 +147,12 @@ jobs:
                 playBg: getComputedStyle(document.querySelector('.play-mark')).backgroundColor,
                 sectionTitle: document.querySelector('#youtube .section-label h2')?.textContent,
                 videoTitle: document.querySelector('#video .section-label h2')?.textContent,
-                aiTitle: document.querySelector('#ai .section-label h2')?.textContent
+                aiTitle: document.querySelector('#ai .section-label h2')?.textContent,
+                productWrapBg: getComputedStyle(document.querySelector('#product .product-demo-wrap')).backgroundColor,
+                productSectionBg: getComputedStyle(document.querySelector('#product')).backgroundColor
               };
             });
-            assert.ok(chrome.navRadius >= 14, 'navigation is not rounded');
+            assert.ok(chrome.navRadius <= 1, 'navigation still uses segmented pill shell');
             assert.notEqual(chrome.activeBg, 'rgb(241, 12, 24)', 'active navigation still uses red fill');
             assert.notEqual(chrome.heroBorder, 'rgb(241, 12, 24)', 'hero still has red divider');
             assert.notEqual(chrome.sectionBorder, 'rgb(241, 12, 24)', 'section still has red divider');
@@ -158,6 +160,8 @@ jobs:
             assert.equal(chrome.sectionTitle, 'YOUTUBE-ПРОЕКТЫ', 'youtube section title not updated');
             assert.equal(chrome.videoTitle, 'ВИДЕОПРОДАКШЕН', 'video section title not updated');
             assert.equal(chrome.aiTitle, 'AI-ПРОДАКШЕН', 'AI section title not updated');
+            assert.notEqual(chrome.productWrapBg, 'rgba(0, 0, 0, 0)', 'product case shell is not dark');
+            assert.notEqual(chrome.productSectionBg, 'rgb(11, 13, 16)', 'product section still paints the whole page dark');
 
             const finalOverflow = await page.evaluate(() => [document.documentElement.scrollWidth, innerWidth]);
             assert.ok(finalOverflow[0] <= finalOverflow[1] + 2, `desktop overflow after dynamic sections ${finalOverflow}`);
@@ -180,13 +184,18 @@ jobs:
               navHeight: document.querySelector('.nav-grid')?.getBoundingClientRect().height,
               productWidth: document.querySelector('.dai-demo-frame')?.getBoundingClientRect().width,
               siteWidth: document.querySelector('.site-browser')?.getBoundingClientRect().width,
-              mainLeft: document.querySelector('main')?.getBoundingClientRect().left
+              mainLeft: document.querySelector('main')?.getBoundingClientRect().left,
+              productLeft: document.querySelector('#product .product-demo-wrap')?.getBoundingClientRect().left,
+              productRight: document.querySelector('#product .product-demo-wrap')?.getBoundingClientRect().right,
+              productTitleLeft: document.querySelector('#product .product-demo-head-copy h3')?.getBoundingClientRect().left
             }));
             assert.ok(state.scrollWidth <= state.viewport + 2, `mobile horizontal overflow ${state.scrollWidth}/${state.viewport}`);
-            assert.ok(state.navHeight >= 44 && state.navHeight <= 50, `mobile nav unsafe height ${state.navHeight}`);
+            assert.ok(state.navHeight >= 40 && state.navHeight <= 46, `mobile nav unsafe height ${state.navHeight}`);
             assert.ok(state.productWidth <= state.viewport - 20, `product frame too wide ${state.productWidth}`);
             assert.ok(state.siteWidth <= state.viewport - 20, `site frame too wide ${state.siteWidth}`);
             assert.ok(state.mainLeft >= 0, 'main shifted outside viewport');
+            assert.ok(state.productLeft >= 10 && state.productRight <= state.viewport - 10, 'product case shell is clipped');
+            assert.ok(state.productTitleLeft >= state.productLeft + 10, 'product title is clipped against shell edge');
             const type = await page.evaluate(() => ({
               aiSecondary: parseFloat(getComputedStyle(document.querySelector('#ai .ai-work--secondary .work-meta strong')).fontSize),
               productHead: parseFloat(getComputedStyle(document.querySelector('.product-demo-head-copy h3')).fontSize),
