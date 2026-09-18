@@ -1,5 +1,5 @@
 import http from "node:http";
-import { createReadStream, createWriteStream } from "node:fs";
+import { createReadStream } from "node:fs";
 import { readFile, stat } from "node:fs/promises";
 import { pipeline } from "node:stream/promises";
 import { Readable } from "node:stream";
@@ -19,7 +19,6 @@ const ADOBE_EMBED = `https://www-ccv.adobe.io/v1/player/ccv/${AI_ID}/embed?api_k
 const CARTOON_PUBLIC_URL = "https://disk.yandex.ru/i/Q6JaTkvI-IB1tw";
 const CARTOON_META_API = `https://cloud-api.yandex.net/v1/disk/public/resources?public_key=${encodeURIComponent(CARTOON_PUBLIC_URL)}`;
 const CARTOON_DOWNLOAD_API = `https://cloud-api.yandex.net/v1/disk/public/resources/download?public_key=${encodeURIComponent(CARTOON_PUBLIC_URL)}`;
-const CARTOON_FILE = "/tmp/portfolio-cartoon.mp4";
 
 const EVENT_MEDIA = {
   promo1: {
@@ -52,16 +51,11 @@ const types = {
 
 let aiMediaCache = null;
 let aiMediaCacheExpiresAt = 0;
-let aiVideoBuffer = null;
-let aiVideoWarmPromise = null;
 
 let cartoonMetaCache = null;
 let cartoonMetaExpiresAt = 0;
 let cartoonDownloadUrl = null;
 let cartoonDownloadExpiresAt = 0;
-let cartoonWarmPromise = null;
-let cartoonReady = false;
-let cartoonSize = 0;
 
 const yandexMetaCache = new Map();
 const yandexDownloadCache = new Map();
@@ -124,31 +118,6 @@ async function resolveAIMedia() {
   aiMediaCache = { mp4, poster };
   aiMediaCacheExpiresAt = Date.now() + 10 * 60 * 1000;
   return aiMediaCache;
-}
-
-async function warmAIVideo() {
-  if (aiVideoBuffer) return aiVideoBuffer;
-  if (aiVideoWarmPromise) return aiVideoWarmPromise;
-
-  aiVideoWarmPromise = (async () => {
-    const media = await resolveAIMedia();
-    const response = await fetch(media.mp4, {
-      redirect: "follow",
-      headers: { "user-agent": "Mozilla/5.0 PortfolioMediaCache/1.0" }
-    });
-
-    if (!response.ok) throw new Error(`Direct MP4 returned ${response.status}`);
-    const arrayBuffer = await response.arrayBuffer();
-    aiVideoBuffer = Buffer.from(arrayBuffer);
-    console.log(`AI ad cached in memory: ${(aiVideoBuffer.length / 1024 / 1024).toFixed(2)} MB`);
-    return aiVideoBuffer;
-  })();
-
-  try {
-    return await aiVideoWarmPromise;
-  } finally {
-    aiVideoWarmPromise = null;
-  }
 }
 
 async function resolveYandexMeta(publicUrl) {
@@ -236,36 +205,6 @@ async function resolveCartoonDownload() {
   cartoonDownloadUrl = data.href;
   cartoonDownloadExpiresAt = Date.now() + 25 * 60 * 1000;
   return cartoonDownloadUrl;
-}
-
-async function warmCartoonVideo() {
-  if (cartoonReady) return { file: CARTOON_FILE, size: cartoonSize };
-  if (cartoonWarmPromise) return cartoonWarmPromise;
-
-  cartoonWarmPromise = (async () => {
-    const href = await resolveCartoonDownload();
-    const response = await fetch(href, {
-      redirect: "follow",
-      headers: { "user-agent": "Mozilla/5.0 PortfolioCartoonCache/1.0" }
-    });
-
-    if (!response.ok || !response.body) throw new Error(`Yandex cartoon file returned ${response.status}`);
-
-    await pipeline(Readable.fromWeb(response.body), createWriteStream(CARTOON_FILE));
-    const info = await stat(CARTOON_FILE);
-    cartoonSize = info.size;
-    cartoonReady = cartoonSize > 0;
-    if (!cartoonReady) throw new Error("Downloaded cartoon file is empty");
-
-    console.log(`Cartoon cached on Railway disk: ${(cartoonSize / 1024 / 1024).toFixed(2)} MB`);
-    return { file: CARTOON_FILE, size: cartoonSize };
-  })();
-
-  try {
-    return await cartoonWarmPromise;
-  } finally {
-    cartoonWarmPromise = null;
-  }
 }
 
 async function serveOptimizedPhoto(req, res, id) {
@@ -357,89 +296,6 @@ async function streamRemoteVideo(req, res, href, contentType = "video/mp4") {
   if (req.method === "HEAD" || !response.body) return res.end();
 
   await pipeline(Readable.fromWeb(response.body), res);
-}
-
-function parseRange(range, total) {
-  if (!range) return null;
-  const match = /^bytes=(\d*)-(\d*)$/.exec(range);
-  if (!match) return { invalid: true };
-
-  let start;
-  let end;
-
-  if (!match[1] && match[2]) {
-    const suffix = Number(match[2]);
-    if (!Number.isFinite(suffix) || suffix <= 0) return { invalid: true };
-    start = Math.max(total - suffix, 0);
-    end = total - 1;
-  } else {
-    start = match[1] ? Number(match[1]) : 0;
-    end = match[2] ? Math.min(Number(match[2]), total - 1) : total - 1;
-  }
-
-  if (!Number.isFinite(start) || !Number.isFinite(end) || start < 0 || start > end || start >= total) {
-    return { invalid: true };
-  }
-
-  return { start, end };
-}
-
-function serveBufferedVideo(req, res, buffer) {
-  const total = buffer.length;
-  const range = parseRange(req.headers.range, total);
-  const common = {
-    "content-type": "video/mp4",
-    "accept-ranges": "bytes",
-    "cache-control": "public, max-age=86400, immutable"
-  };
-
-  if (!range) {
-    res.writeHead(200, { ...common, "content-length": total });
-    if (req.method === "HEAD") return res.end();
-    return res.end(buffer);
-  }
-
-  if (range.invalid) {
-    res.writeHead(416, { "content-range": `bytes */${total}` });
-    return res.end();
-  }
-
-  const chunk = buffer.subarray(range.start, range.end + 1);
-  res.writeHead(206, {
-    ...common,
-    "content-range": `bytes ${range.start}-${range.end}/${total}`,
-    "content-length": chunk.length
-  });
-  if (req.method === "HEAD") return res.end();
-  return res.end(chunk);
-}
-
-function serveVideoFile(req, res, file, total) {
-  const range = parseRange(req.headers.range, total);
-  const common = {
-    "content-type": "video/mp4",
-    "accept-ranges": "bytes",
-    "cache-control": "public, max-age=86400, immutable"
-  };
-
-  if (!range) {
-    res.writeHead(200, { ...common, "content-length": total });
-    if (req.method === "HEAD") return res.end();
-    return createReadStream(file).pipe(res);
-  }
-
-  if (range.invalid) {
-    res.writeHead(416, { "content-range": `bytes */${total}` });
-    return res.end();
-  }
-
-  res.writeHead(206, {
-    ...common,
-    "content-range": `bytes ${range.start}-${range.end}/${total}`,
-    "content-length": range.end - range.start + 1
-  });
-  if (req.method === "HEAD") return res.end();
-  return createReadStream(file, { start: range.start, end: range.end }).pipe(res);
 }
 
 async function warmRemoteMetadata() {
