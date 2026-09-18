@@ -83,6 +83,19 @@ async function downloadFile(url, output) {
   await pipeline(Readable.fromWeb(response.body), createWriteStream(output));
 }
 
+async function seedCoverFromPreview(item, previewUrl) {
+  if (!previewUrl) return;
+  try {
+    await downloadFile(previewUrl, item.cover);
+    const info = await stat(item.cover);
+    if (info.size < 5000) throw new Error("preview cover is too small");
+    console.log(`${item.name}: temporary cover ready from Yandex preview, ${(info.size / 1024).toFixed(0)} KB`);
+  } catch (error) {
+    await unlink(item.cover).catch(() => {});
+    console.warn(`${item.name}: temporary preview cover skipped: ${error.message}`);
+  }
+}
+
 async function buildCover(item) {
   let best = null;
   const candidates = [];
@@ -124,6 +137,7 @@ for (const item of items) {
   const meta = await resolveMetadata(item.publicUrl);
   console.log(`${meta.name || item.name}: ${meta.mime_type || "unknown"}, ${Number(meta.size || 0)} bytes`);
 
+  await seedCoverFromPreview(item, meta.preview);
   await downloadFile(meta.file, item.source);
   const sourceInfo = await stat(item.source);
   if (sourceInfo.size < 100000) throw new Error(`${item.name}: downloaded source is too small`);
@@ -168,4 +182,5 @@ for (const item of items) {
     throw new Error(`${item.name} output verification failed: video=${videoInfo.size}, cover=${coverInfo.size}`);
   }
   console.log(`${item.name} ready: ${codec} MP4 ${(videoInfo.size / 1024 / 1024).toFixed(1)} MB, cover ${(coverInfo.size / 1024).toFixed(0)} KB`);
+  await unlink(item.source).catch(() => {});
 }
