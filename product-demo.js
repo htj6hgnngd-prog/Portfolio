@@ -5,7 +5,7 @@
   if (!document.querySelector('link[href^="/product-demo.css"]')) {
     const stylesheet = document.createElement("link");
     stylesheet.rel = "stylesheet";
-    stylesheet.href = "/product-demo.css?v=4";
+    stylesheet.href = "/product-demo.css?v=5";
     document.head.appendChild(stylesheet);
   }
 
@@ -14,7 +14,7 @@
   section.innerHTML = `
     <div class="section-label">
       <div class="section-number">05</div>
-      <h2>РАЗРАБОТКА ПРОДУКТА</h2>
+      <h2>ЦИФРОВОЙ ПРОДУКТ</h2>
       <p>ДИРЕКТ ИИ</p>
       <span class="label-rule"></span>
     </div>
