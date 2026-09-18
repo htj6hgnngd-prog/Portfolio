@@ -12,7 +12,7 @@ const outDir=path.join(root,"assets","generated");
 await mkdir(outDir,{recursive:true});
 
 const items=[
-  {name:"promo-1",publicUrl:"https://disk.yandex.ru/i/iIj6z28I2z0d3w",coverTime:"00:00:14.000"},
+  {name:"promo-1",publicUrl:"https://disk.yandex.ru/i/iIj6z28I2z0d3w",coverTime:"00:00:07.000"},
   {name:"promo-2",publicUrl:"https://disk.yandex.ru/i/CGJbZxDuh1ORXw",coverTime:"00:00:06.000"}
 ];
 
