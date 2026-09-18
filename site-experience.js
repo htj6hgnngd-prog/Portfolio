@@ -24,7 +24,7 @@
         '<div class="site-stage">',
           '<div class="site-canvas">',
             '<div class="site-live-viewport">',
-              '<img class="site-long-page" src="/assets/site-case/denisovphoto-desktop.png?v=1" alt="Denisov Photo desktop website" decoding="async">',
+              '<img class="site-long-page" src="/assets/site-case/denisovphoto-desktop.png?v=1" alt="Denisov Photo desktop website" loading="lazy" fetchpriority="low" decoding="async">',
               '<div class="site-form-overlay" aria-hidden="true">',
                 '<div class="site-form-card">',
                   '<button type="button" class="site-form-close">×</button>',
@@ -151,6 +151,7 @@
   function reset() {
     page.style.transitionDuration = "0ms";
     page.style.transform = "translate3d(0,0,0)";
+    page.style.willChange = "auto";
     closeForm();
 
     consent.classList.remove("is-checked");
@@ -210,6 +211,8 @@
     reset();
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
+    page.style.willChange = "transform";
+
     // Спокойный непрерывный проход от главной к портфолио.
     moveCursor(1080, 610);
     scrollToFraction(.50, 12200);
@@ -222,6 +225,7 @@
 
     if (!(await sleep(14800, token))) return;
 
+    page.style.willChange = "auto";
     cursor.classList.remove("is-visible");
     openForm();
 
