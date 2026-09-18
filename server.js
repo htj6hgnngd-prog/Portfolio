@@ -33,6 +33,11 @@ const EVENT_MEDIA = {
   }
 };
 
+const EVENT_COVER_FALLBACKS = {
+  "/promo-1-cover.jpg": EVENT_MEDIA.promo1.publicUrl,
+  "/promo-2-cover.jpg": EVENT_MEDIA.promo2.publicUrl
+};
+
 const types = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
@@ -405,6 +410,27 @@ function serveVideoFile(req, res, file, total) {
 const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host}`);
+
+    const coverFallbackUrl = EVENT_COVER_FALLBACKS[url.pathname];
+    if (coverFallbackUrl) {
+      const localCover = path.join(root, url.pathname.slice(1));
+      try {
+        await stat(localCover);
+      } catch {
+        try {
+          const meta = await resolveYandexMeta(coverFallbackUrl);
+          if (!meta.preview) throw new Error("Event preview unavailable");
+          res.writeHead(302, { location: meta.preview, "cache-control": "no-store" });
+          res.end();
+          return;
+        } catch (error) {
+          console.error("Event cover fallback error:", error);
+          res.writeHead(404, { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" });
+          res.end("Poster unavailable");
+          return;
+        }
+      }
+    }
 
     if (url.pathname === "/media/site-capture") {
       await serveSiteCapture(req, res);
