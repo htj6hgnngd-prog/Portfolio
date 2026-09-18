@@ -9,7 +9,6 @@ const root=path.dirname(fileURLToPath(import.meta.url));
 const port=Number(process.env.PORT||3000);
 const AI_ID="5-9tzVe57JY";
 const ADOBE_EMBED="https://www-ccv.adobe.io/v1/player/ccv/"+AI_ID+"/embed?api_key=behance1&bgcolor=%23191919";
-const CARTOON_PUBLIC_URL="https://disk.yandex.ru/i/Q6JaTkvI-IB1tw";
 
 const types={
   ".html":"text/html; charset=utf-8",
@@ -25,8 +24,6 @@ const types={
 
 let aiCache=null;
 let aiExpires=0;
-let cartoonDownload=null;
-let cartoonExpires=0;
 
 function decodeEmbedded(value){
   if(!value)return null;
@@ -53,46 +50,6 @@ async function resolveAI(){
   return aiCache;
 }
 
-async function resolveCartoon(){
-  if(cartoonDownload&&Date.now()<cartoonExpires)return cartoonDownload;
-  const api="https://cloud-api.yandex.net/v1/disk/public/resources/download?public_key="+encodeURIComponent(CARTOON_PUBLIC_URL);
-  const response=await fetch(api,{redirect:"follow",headers:{accept:"application/json","user-agent":"Mozilla/5.0 Portfolio/1.0"}});
-  if(!response.ok)throw new Error("Yandex "+response.status);
-  const data=await response.json();
-  if(!data.href)throw new Error("Cartoon URL missing");
-  cartoonDownload=data.href;
-  cartoonExpires=Date.now()+25*60*1000;
-  return cartoonDownload;
-}
-
-async function streamRemoteVideo(req,res,href,contentType="video/mp4"){
-  const headers={accept:"*/*","user-agent":"Mozilla/5.0 PortfolioStream/1.0"};
-  if(req.headers.range)headers.range=req.headers.range;
-  const response=await fetch(href,{redirect:"follow",headers});
-  if(!response.ok&&response.status!==206)throw new Error("Remote video "+response.status);
-  const outgoing={
-    "content-type":response.headers.get("content-type")||contentType,
-    "accept-ranges":response.headers.get("accept-ranges")||"bytes",
-    "cache-control":"public, max-age=3600"
-  };
-  const length=response.headers.get("content-length");
-  const range=response.headers.get("content-range");
-  if(length)outgoing["content-length"]=length;
-  if(range)outgoing["content-range"]=range;
-  res.writeHead(response.status===206?206:200,outgoing);
-  if(req.method==="HEAD"||!response.body)return res.end();
-  const reader=response.body.getReader();
-  const pump=async()=>{
-    for(;;){
-      const {done,value}=await reader.read();
-      if(done)break;
-      if(!res.write(Buffer.from(value)))await new Promise(resolve=>res.once("drain",resolve));
-    }
-    res.end();
-  };
-  try{await pump()}catch(error){try{reader.cancel()}catch{}throw error}
-}
-
 function redirect(res,location,cacheControl="no-store"){
   res.writeHead(302,{location,"cache-control":cacheControl});
   res.end();
@@ -108,8 +65,17 @@ function parseRange(header,size){
   if(!header)return null;
   const match=/bytes=(\d*)-(\d*)/.exec(header);
   if(!match)return null;
-  let start=match[1]?Number(match[1]):0;
-  let end=match[2]?Number(match[2]):size-1;
+  let start;
+  let end;
+  if(!match[1]&&match[2]){
+    const suffix=Number(match[2]);
+    if(!Number.isFinite(suffix)||suffix<=0)return null;
+    start=Math.max(0,size-suffix);
+    end=size-1;
+  }else{
+    start=Number(match[1]||0);
+    end=match[2]?Number(match[2]):size-1;
+  }
   if(!Number.isFinite(start)||!Number.isFinite(end)||start<0||end<start||start>=size)return null;
   end=Math.min(end,size-1);
   return {start,end};
@@ -186,7 +152,6 @@ const server=http.createServer(async(req,res)=>{
       if(!poster)throw new Error("AI poster missing");
       return redirect(res,poster,"public, max-age=300");
     }
-    if(url.pathname==="/media/cartoon-video")return await streamRemoteVideo(req,res,await resolveCartoon(),"video/mp4");
 
     const requested=decodeURIComponent(url.pathname==="/"?"/index.html":url.pathname);
     const normalized=path.normalize(requested).replace(/^(\.\.(\/|\\|$))+/,"");
@@ -207,5 +172,5 @@ const server=http.createServer(async(req,res)=>{
 
 server.listen(port,"0.0.0.0",()=>{
   console.log("Portfolio listening on "+port);
-  setTimeout(()=>Promise.allSettled([resolveAI(),resolveCartoon()]),700).unref();
+  setTimeout(()=>Promise.allSettled([resolveAI()]),700).unref();
 });

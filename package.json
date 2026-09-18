@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node prepare-site-capture.js && node prepare-photo-assets.js && node prepare-event-media.js",
+    "build": "node prepare-site-capture.js && node prepare-photo-assets.js && node prepare-event-media.js && node prepare-cartoon-media.js",
     "start": "node server.js"
   },
   "dependencies": {
