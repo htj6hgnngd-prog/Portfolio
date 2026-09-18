@@ -345,7 +345,7 @@ async function streamRemoteVideo(req, res, href, contentType = "video/mp4") {
   const outgoing = {
     "content-type": contentType,
     "accept-ranges": response.headers.get("accept-ranges") || "bytes",
-    "cache-control": "public, max-age=300"
+    "cache-control": "public, max-age=86400"
   };
 
   const contentLength = response.headers.get("content-length");
