@@ -204,5 +204,3 @@ window.addEventListener("pagehide", resetViewer);
 
 resetViewer();
 updateNav();
-
-const loadedSections=new Set();function loadNear(id,distance,task){const target=document.getElementById(id);if(!target||loadedSections.has(id))return;const run=async()=>{if(loadedSections.has(id))return;loadedSections.add(id);try{await task()}catch(error){console.error(id+" section failed to load",error)}};if(!("IntersectionObserver"in window)){run();return}const o=new IntersectionObserver(entries=>{if(!entries.some(e=>e.isIntersecting))return;o.disconnect();run()},{rootMargin:distance+"px 0px",threshold:0});o.observe(target)}loadNear("photo",600,()=>import("/photo-gallery.js?v=20260918-clean"));

@@ -15,13 +15,6 @@
   const section = document.getElementById("photo");
   if (!section) return;
 
-  if (!document.querySelector('link[data-photo-styles]')) {
-    const stylesheet = document.createElement("link");
-    stylesheet.rel = "stylesheet";
-    stylesheet.href = "/photo.css?v=20260918-clean";
-    stylesheet.dataset.photoStyles = "true";
-    document.head.appendChild(stylesheet);
-  }
 
   section.classList.add("photo-section");
   section.innerHTML = `
