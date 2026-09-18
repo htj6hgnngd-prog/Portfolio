@@ -105,12 +105,28 @@ async function waitForInternal() {
   throw new Error("Internal portfolio server did not start");
 }
 
-async function verifyEventFiles() {
-  for (const [route, file] of Object.entries(EVENT_VIDEO_FILES)) {
-    const info = await stat(file);
-    if (info.size < 100000) throw new Error(`${route}: local video is too small`);
-    console.log(`${route} verified local H.264 MP4: ${(info.size / 1024 / 1024).toFixed(1)} MB`);
-  }
+let mediaPrepareStarted = false;
+
+function prepareEventMediaInBackground() {
+  if (mediaPrepareStarted) return;
+  mediaPrepareStarted = true;
+
+  const worker = spawn(process.execPath, ["prepare-event-media.js"], {
+    env: process.env,
+    stdio: ["ignore", "inherit", "inherit"]
+  });
+
+  worker.on("error", (error) => {
+    console.error("Event media background preparation failed to start:", error.message);
+  });
+
+  worker.on("exit", (code, signal) => {
+    if (code === 0) {
+      console.log("Event media background preparation complete");
+      return;
+    }
+    console.error(`Event media background preparation exited: code=${code} signal=${signal || "none"}`);
+  });
 }
 
 const child = spawn(process.execPath, ["server.js"], {
@@ -124,14 +140,20 @@ child.on("exit", (code, signal) => {
 });
 
 await waitForInternal();
-await verifyEventFiles();
-
 const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
     const localVideo = EVENT_VIDEO_FILES[url.pathname];
     if (localVideo) {
-      await serveLocalVideo(req, res, localVideo);
+      try {
+        await serveLocalVideo(req, res, localVideo);
+      } catch (error) {
+        if (error?.code === "ENOENT") {
+          proxyToInternal(req, res);
+          return;
+        }
+        throw error;
+      }
       return;
     }
     proxyToInternal(req, res);
@@ -146,4 +168,5 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(externalPort, "0.0.0.0", () => {
   console.log(`Portfolio proxy listening on ${externalPort}, internal app on ${internalPort}`);
+  setTimeout(prepareEventMediaInBackground, 1500).unref();
 });
