@@ -212,15 +212,15 @@
 
     // Спокойный непрерывный проход от главной к портфолио.
     moveCursor(1080, 610);
-    scrollToFraction(.50, 13500);
+    scrollToFraction(.50, 12200);
 
-    if (!(await sleep(13500, token))) return;
+    if (!(await sleep(12200, token))) return;
 
     // Без остановки продолжаем реальный сайт до нижних блоков и формы.
     moveCursor(1060, 610);
-    scrollToFraction(1, 16500);
+    scrollToFraction(1, 14800);
 
-    if (!(await sleep(16500, token))) return;
+    if (!(await sleep(14800, token))) return;
 
     cursor.classList.remove("is-visible");
     openForm();
