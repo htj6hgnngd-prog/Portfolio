@@ -25,5 +25,5 @@
     observer.observe(target);
   }
 
-  near("photo", 1200, () => import("/photo-gallery.js?v=6"));
+  near("photo", 600, () => import("/photo-gallery.js?v=6"));
 })();
