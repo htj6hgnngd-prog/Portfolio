@@ -14,7 +14,7 @@
 .site-home-page,.site-portfolio-page{position:absolute;inset:0;opacity:0;visibility:hidden;transform:scale(1.01);transition:opacity .65s ease,transform .8s cubic-bezier(.22,1,.36,1),visibility .65s step-end;pointer-events:none}
 .site-home-page.is-active,.site-portfolio-page.is-active{opacity:1;visibility:visible;transform:none;transition:opacity .65s ease,transform .8s cubic-bezier(.22,1,.36,1),visibility 0s;pointer-events:auto}
 
-.site-long-page{position:absolute;top:0;left:0;width:1440px;height:auto;display:block;transform:translate3d(0,0,0);transition-property:transform;transition-timing-function:cubic-bezier(.22,1,.36,1);will-change:transform}
+.site-long-page{position:absolute;top:0;left:0;width:1440px;height:auto;display:block;transform:translate3d(0,0,0);transition-property:transform;transition-timing-function:cubic-bezier(.32,.78,.46,1);will-change:transform}
 
 .site-portfolio-page{background:#f4f1eb;color:#111}
 .site-portfolio-scroll{position:absolute;top:0;left:0;width:1440px;min-height:2200px;transform:translate3d(0,0,0);transition-property:transform;transition-timing-function:cubic-bezier(.22,1,.36,1);will-change:transform}
