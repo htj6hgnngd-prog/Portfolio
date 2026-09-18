@@ -1,0 +1,46 @@
+name: QA cartoon final9
+on:
+  push:
+    branches: ['qa-cartoon-final9-1789704320261']
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Verify real cartoon playback
+        run: |
+          cat > qa.cjs <<'NODE'
+          const { chromium }=require('playwright');
+          const fs=require('node:fs');
+          (async()=>{
+            fs.mkdirSync('qa-artifact',{recursive:true});
+            const b=await chromium.launch({headless:true});
+            const p=await b.newPage({viewport:{width:1440,height:1000}});
+            const responses=[];
+            p.on('response',r=>{if(r.url().includes('cartoon.mp4'))responses.push({status:r.status(),headers:r.headers(),url:r.url()})});
+            await p.goto('https://portfolio-main-production-fdd5.up.railway.app/',{waitUntil:'domcontentloaded',timeout:120000});
+            await p.locator('[data-ai-work="cartoon"]').scrollIntoViewIfNeeded();
+            await p.locator('[data-ai-work="cartoon"]').click();
+            await p.waitForSelector('#viewer.is-open #ai-cartoon-player',{timeout:30000});
+            await p.waitForFunction(()=>{const v=document.querySelector('#viewer #ai-cartoon-player');return v&&v.readyState>=1&&v.videoWidth>0&&!v.error},{timeout:30000});
+            await p.evaluate(async()=>{const v=document.querySelector('#viewer #ai-cartoon-player');v.muted=true;await v.play()});
+            await p.waitForFunction(()=>{const v=document.querySelector('#viewer #ai-cartoon-player');return v&&v.currentTime>0.5&&!v.paused&&!v.error},{timeout:30000});
+            const state=await p.evaluate(()=>{const v=document.querySelector('#viewer #ai-cartoon-player');return {readyState:v.readyState,networkState:v.networkState,videoWidth:v.videoWidth,videoHeight:v.videoHeight,currentTime:v.currentTime,paused:v.paused,error:v.error&&{code:v.error.code,message:v.error.message},src:v.currentSrc}});
+            console.log('CARTOON_OK',JSON.stringify(state));
+            console.log('CARTOON_RESPONSES',JSON.stringify(responses));
+            await p.screenshot({path:'qa-artifact/cartoon-playing.png'});
+            await b.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+          node qa.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cartoon-final9-proof
+          path: qa-artifact/
+          retention-days: 2
