@@ -1,0 +1,62 @@
+name: QA YouTube first-open
+on:
+  push:
+    branches: ['qa-youtube-1789704625343']
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Verify every YouTube video first-open
+        run: |
+          cat > qa.cjs <<'NODE'
+          const { chromium } = require('playwright');
+          const assert = require('node:assert/strict');
+          const url='https://portfolio-main-production-fdd5.up.railway.app/';
+          const build='20260918-final10';
+          const ids=['pPTTScpvxMA','RBRXIkmQUJI','FhwHKvgYwGo'];
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          async function waitBuild(){for(let i=0;i<80;i++){try{const r=await fetch(url,{cache:'no-store'}),h=await r.text();if(r.ok&&h.includes('portfolio-build" content="'+build+'"'))return}catch{}await sleep(3000)}throw Error('production build timeout')}
+          async function check(page,index,id){
+            await page.locator('.work-thumb').nth(index).click();
+            await page.waitForSelector('#viewer.is-open iframe',{timeout:20000});
+            const frame=page.frames().find(f=>f.url().includes('/embed/'+id));
+            assert.ok(frame,'iframe frame missing for '+id);
+            await frame.waitForLoadState('domcontentloaded',{timeout:20000}).catch(()=>{});
+            await page.waitForTimeout(2500);
+            const text=(await frame.locator('body').innerText().catch(()=>''))||'';
+            console.log('VIDEO',id,'FRAME',frame.url(),'TEXT',text.slice(0,500).replace(/\n/g,' | '));
+            assert.ok(!/video unavailable|this video is unavailable|видео недоступно/i.test(text),'YouTube unavailable for '+id);
+            const player=frame.locator('.html5-video-player');
+            assert.ok(await player.count(),'YouTube player missing for '+id);
+            await page.locator('#viewer-close').click();
+            await page.waitForSelector('#viewer',{state:'hidden'});
+          }
+          (async()=>{
+            await waitBuild();
+            const browser=await chromium.launch({headless:true});
+            const page=await browser.newPage({viewport:{width:1440,height:1000}});
+            const errors=[];page.on('pageerror',e=>errors.push(e.message));
+            await page.goto(url,{waitUntil:'domcontentloaded',timeout:120000});
+            for(let i=0;i<3;i++) await check(page,i,ids[i]);
+            // Cycle all three with arrows and return to first.
+            await page.locator('.work-thumb').nth(0).click();
+            for(let i=0;i<3;i++){
+              await page.locator('#viewer-next').click();
+              await page.waitForTimeout(700);
+            }
+            const firstAgain=page.frames().find(f=>f.url().includes('/embed/'+ids[0]));
+            assert.ok(firstAgain,'first video missing after 1→2→3→1 cycle');
+            const text=(await firstAgain.locator('body').innerText().catch(()=>''))||'';
+            assert.ok(!/video unavailable|this video is unavailable|видео недоступно/i.test(text),'first video unavailable after cycle');
+            assert.deepEqual(errors,[]);
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+          node qa.cjs
