@@ -159,8 +159,8 @@ function moveVideo(direction) {
 
 $("#youtube-featured").addEventListener("click", () => renderYoutube(activeVideo));
 $$(".work-thumb").forEach((el, index) => el.addEventListener("click", () => renderYoutube(index)));
-$('[data-ai-work]').forEach((el) => el.addEventListener("click", () => renderAI(el.dataset.aiWork)));
-$("[data-event-work]").forEach((el)=>el.addEventListener("click",()=>renderEvent(el.dataset.eventWork)));
+$$('[data-ai-work]').forEach((el) => el.addEventListener("click", () => renderAI(el.dataset.aiWork)));
+$$("[data-event-work]").forEach((el)=>el.addEventListener("click",()=>renderEvent(el.dataset.eventWork)));
 $("#viewer-close").addEventListener("click", closeViewer);
 $("#viewer-prev").addEventListener("click", () => moveVideo(-1));
 $("#viewer-next").addEventListener("click", () => moveVideo(1));
