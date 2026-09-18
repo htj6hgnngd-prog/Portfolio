@@ -97,3 +97,15 @@
 .site-home-page,.site-portfolio-page,.site-long-page,.site-portfolio-scroll,.site-form-overlay,.site-form-card,.site-form-success,.site-cursor{transition:none!important}
 .site-cursor::after{animation:none!important}
 }
+
+/* v7 — real-page viewer only */
+.site-photo-viewer{position:absolute;inset:0;z-index:28;display:grid;place-items:center;padding:46px;background:rgba(8,8,8,.93);backdrop-filter:blur(12px);opacity:0;visibility:hidden;transition:opacity .48s ease,visibility .48s step-end;pointer-events:none}
+.site-photo-viewer.is-open{opacity:1;visibility:visible;transition:opacity .48s ease,visibility 0s;pointer-events:auto}
+.site-photo-viewer>img{max-width:1180px;max-height:760px;width:auto;height:auto;object-fit:contain;box-shadow:0 26px 70px rgba(0,0,0,.28);transform:scale(.985);transition:transform .55s cubic-bezier(.22,1,.36,1)}
+.site-photo-viewer.is-open>img{transform:scale(1)}
+.site-photo-close{position:absolute;top:28px;right:28px;width:40px;height:40px;border:1px solid rgba(255,255,255,.5);border-radius:50%;background:rgba(8,8,8,.18);color:#fff;font-size:22px;cursor:pointer}
+.site-photo-meta{position:absolute;left:42px;bottom:30px;display:flex;align-items:center;gap:14px;color:#fff}
+.site-photo-meta span{font-size:10px;font-weight:800;letter-spacing:.08em;opacity:.66}
+.site-photo-meta strong{font-size:12px}
+.site-long-page{transition-timing-function:cubic-bezier(.22,1,.36,1)!important}
+@media(max-width:900px){.site-photo-viewer{padding:28px}.site-photo-close{top:18px;right:18px}.site-photo-meta{left:24px;bottom:20px}}
