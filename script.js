@@ -34,33 +34,23 @@ const $$ = (s) => [...document.querySelectorAll(s)];
 function lockViewerScroll() {
   if (viewerScrollY !== null) return;
   viewerScrollY = window.scrollY;
-  const body = document.body;
-  body.classList.add("modal-open");
-  body.style.position = "fixed";
-  body.style.top = `-${viewerScrollY}px`;
-  body.style.left = "0";
-  body.style.right = "0";
-  body.style.width = "100%";
+  document.documentElement.classList.add("modal-open");
+  document.body.classList.add("modal-open");
+  document.documentElement.style.overflow = "hidden";
+  document.body.style.overflow = "hidden";
 }
 
 function unlockViewerScroll() {
-  if (viewerScrollY === null) {
-    document.body.classList.remove("modal-open");
-    return;
-  }
-
   const y = viewerScrollY;
   viewerScrollY = null;
-  const body = document.body;
-  body.classList.remove("modal-open");
-  body.style.position = "";
-  body.style.top = "";
-  body.style.left = "";
-  body.style.right = "";
-  body.style.width = "";
-  window.scrollTo(0, y);
+  document.documentElement.classList.remove("modal-open");
+  document.body.classList.remove("modal-open");
+  document.documentElement.style.overflow = "";
+  document.body.style.overflow = "";
+  if (y !== null && Math.abs(window.scrollY - y) > 1) {
+    requestAnimationFrame(() => window.scrollTo(0, y));
+  }
 }
-
 function restoreAIPlayer(key = activeAIKey) {
   if (!key || !aiWorks[key]) return;
   const work = aiWorks[key];
@@ -191,14 +181,28 @@ $("#viewer-prev").addEventListener("click", () => moveVideo(-1));
 $("#viewer-next").addEventListener("click", () => moveVideo(1));
 
 const viewerElement = $("#viewer");
-viewerElement.addEventListener("pointerdown", (event) => {
-  const target = event.target instanceof Element ? event.target : null;
-  const isInteractive = target?.closest(".viewer-header, .viewer-frame, .viewer-controls");
-  if (!isInteractive) {
+const isViewerInteractiveTarget = (target) =>
+  target instanceof Element &&
+  Boolean(target.closest(".viewer-header, .viewer-frame, .viewer-controls"));
+
+viewerElement.addEventListener(
+  "pointerdown",
+  (event) => {
+    if (!isViewerInteractiveTarget(event.target)) event.stopImmediatePropagation();
+  },
+  true
+);
+
+viewerElement.addEventListener(
+  "click",
+  (event) => {
+    if (isViewerInteractiveTarget(event.target)) return;
     event.preventDefault();
-    closeViewer();
-  }
-});
+    event.stopImmediatePropagation();
+    resetViewer();
+  },
+  true
+);
 
 viewerElement.addEventListener("touchmove", (event) => {
   const target = event.target instanceof Element ? event.target : null;
