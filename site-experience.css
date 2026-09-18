@@ -74,16 +74,17 @@
 .site-form-success strong{font-size:11px}
 .site-form-success span{color:#666159;font-size:9px}
 
-.site-cursor{position:absolute;z-index:60;top:0;left:0;width:20px;height:28px;opacity:0;transition:transform 1.55s cubic-bezier(.22,1,.36,1),opacity .28s ease;pointer-events:none;filter:drop-shadow(0 3px 5px rgba(0,0,0,.55))}
+.site-cursor{position:absolute;z-index:80;top:0;left:0;width:20px;height:28px;opacity:0;transition:transform 1.35s cubic-bezier(.22,1,.36,1),opacity .25s ease;pointer-events:none;filter:drop-shadow(0 3px 5px rgba(0,0,0,.6))}
 .site-cursor::before{content:"";position:absolute;inset:0;background:#fff;clip-path:polygon(0 0,0 100%,29% 72%,44% 100%,60% 91%,44% 65%,79% 65%)}
-.site-cursor::after{content:"";position:absolute;width:9px;height:9px;top:2px;left:2px;border:2px solid #ff2a2a;border-radius:50%;opacity:0;transform:scale(.25)}
+.site-cursor::after{content:"";position:absolute;width:9px;height:9px;top:2px;left:2px;border:2px solid #718cf5;border-radius:50%;opacity:0;transform:scale(.25)}
 .site-cursor.is-visible{opacity:1}
-.site-cursor.is-clicking::after{animation:site-click .55s ease-out}
+.site-cursor.is-clicking::after{animation:site-click .42s ease-out}
 
 @keyframes site-click{0%{opacity:0;transform:scale(.25)}30%{opacity:1}100%{opacity:0;transform:scale(3.2)}}
 
 @media(max-width:900px){
 .site-client-demo{padding-top:34px!important;padding-bottom:42px!important}
+.site-cursor{width:16px!important;height:22px!important}
 .site-browser{border-radius:9px}
 .site-browser-bar{height:30px;grid-template-columns:64px 1fr 64px;padding:0 7px}
 .site-browser-dots{gap:3px}
