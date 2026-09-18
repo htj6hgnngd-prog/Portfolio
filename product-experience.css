@@ -31,3 +31,28 @@
 @keyframes dai-spin{to{transform:rotate(360deg)}}@keyframes dai-blink{50%{opacity:0}}@keyframes dai-click{0%{opacity:0;transform:scale(.25)}30%{opacity:1}100%{opacity:0;transform:scale(3.2)}}
 @media(max-width:900px){.product-web-demo{padding-top:34px!important;padding-bottom:42px!important}.dai-browser{border-radius:9px}.dai-browser-bar{height:30px;grid-template-columns:64px 1fr 86px;padding:0 7px}.dai-browser-dots{gap:3px}.dai-browser-dots i{width:5px;height:5px}.dai-browser-address{font-size:6px}.dai-browser-demo{font-size:5.5px}.dai-browser-demo i{width:4px;height:4px;margin-right:3px}}
 @media(prefers-reduced-motion:reduce){.dai-page,.dai-analysis-line,.dai-agent-answer,.dai-success,.dai-cursor{transition:none!important}.dai-analysis-line i,.dai-typing-caret,.dai-cursor::after{animation:none!important}}
+
+/* v4 — agent-first desktop flow */
+.dai-agent-page{padding:0!important}
+.dai-agent-start{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:70px 110px 100px;text-align:center;transition:opacity .35s ease,transform .45s cubic-bezier(.22,1,.36,1)}
+.dai-agent-eyebrow{color:#718cf5;font-size:11px;font-weight:800;letter-spacing:.1em}
+.dai-agent-start h3{margin:12px 0 12px;font-size:58px;line-height:.96;letter-spacing:-.052em}
+.dai-agent-start>p{max-width:660px;margin:0;color:#8290a1;font-size:14px;line-height:1.55}
+.dai-agent-composer{width:min(820px,84%);height:72px;display:flex;align-items:center;margin-top:34px;padding:0 18px 0 22px;border:1px solid #293542;border-radius:18px;background:#0a1018;box-shadow:0 18px 48px rgba(0,0,0,.18);text-align:left}
+.dai-agent-composer.is-active{border-color:#4663a5;box-shadow:0 0 0 3px rgba(113,140,245,.08)}
+.dai-agent-input{flex:1;color:#eef3f8;font-size:15px}
+.dai-agent-input:empty::before{content:"Например: проверь, почему выросла цена заявки";color:#677586}
+.dai-agent-caret{width:2px;height:20px;background:#fff;opacity:0}.dai-agent-caret.is-visible{opacity:1;animation:dai-blink .8s steps(1) infinite}
+.dai-agent-composer>b{width:38px;height:38px;display:grid;place-items:center;border-radius:11px;background:#5f78e8;color:#fff;font-size:18px}
+.dai-quick-prompts{width:min(900px,88%);display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:16px}
+.dai-quick-prompts button{border:1px solid #26323f;border-radius:999px;padding:10px 13px;color:#8d99a9;background:#0a1017;font-size:11px;cursor:pointer}
+.dai-agent-review{position:absolute;left:50%;bottom:44px;width:min(920px,84%);padding:18px 20px;border:1px solid #273442;border-radius:16px;background:#0a1119;box-shadow:0 22px 52px rgba(0,0,0,.24);opacity:0;transform:translate(-50%,20px);transition:opacity .35s ease,transform .45s cubic-bezier(.22,1,.36,1)}
+.dai-agent-review.is-visible{opacity:1;transform:translate(-50%,0)}
+.dai-agent-review.is-visible~*{}
+.dai-review-state{display:flex;align-items:center;justify-content:space-between;gap:22px}.dai-review-state>div>span,.dai-review-result>span{color:#718cf5;font-size:9px;font-weight:800;letter-spacing:.08em}.dai-review-state strong{display:block;margin:6px 0 4px;font-size:16px}.dai-review-state p{margin:0;color:#7b8797;font-size:10px}.dai-review-state>em{display:flex;align-items:center;gap:8px;color:#7f8b9b;font-size:10px;font-style:normal}.dai-review-state>em i{width:12px;height:12px;border:2px solid #344152;border-top-color:#718cf5;border-radius:50%;animation:dai-spin .85s linear infinite}
+.dai-review-progress{height:3px;margin-top:14px;overflow:hidden;border-radius:999px;background:#18212c}.dai-review-progress i{display:block;width:14%;height:100%;border-radius:inherit;background:#718cf5;transition:width 1.6s cubic-bezier(.22,1,.36,1)}.dai-agent-review.is-complete .dai-review-progress i{width:100%}
+.dai-review-result{display:flex;align-items:center;gap:14px;margin-top:15px;padding-top:14px;border-top:1px solid #202b37;opacity:0;transform:translateY(8px);transition:.3s ease}.dai-review-result.is-visible{opacity:1;transform:none}.dai-review-result strong{flex:1;font-size:13px}.dai-review-result button{border:1px solid #42578a;border-radius:9px;padding:9px 12px;background:#17223a;color:#c9d5ff;font-size:10px;font-weight:760;cursor:pointer}
+.dai-agent-review.is-visible+.nothing{display:none}
+.dai-cursor{width:20px!important;height:28px!important}
+.dai-cursor::after{width:9px!important;height:9px!important;border-width:2px!important}
+@media(max-width:900px){.dai-cursor{width:16px!important;height:22px!important}.dai-agent-start h3{font-size:58px}.dai-agent-review{bottom:38px}}
