@@ -38,13 +38,13 @@
     observer.observe(target);
   }
 
-  near("photo", 1200, () => import("/photo-gallery.js?v=5"));
+  near("photo", 1200, () => import("/photo-gallery.js?v=6"));
   near("product", 1700, async () => {
-    await loadStyle("/product-demo.css?v=4");
-    await import("/product-demo.js?v=5");
+    await loadStyle("/product-demo.css?v=5");
+    await import("/product-demo.js?v=6");
   });
   near("site", 1900, async () => {
-    await loadStyle("/site-case.css?v=4");
-    await import("/site-case.js?v=4");
+    await loadStyle("/site-case.css?v=5");
+    await import("/site-case.js?v=5");
   });
 })();
