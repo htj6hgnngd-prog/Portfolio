@@ -917,7 +917,7 @@ body .photo-viewer-arrow:hover {
 
 @media (max-width: 640px) {
   body #product.product-demo-section .product-demo-head-copy h3 {
-    font-size: clamp(29px, 8.4vw, 34px);
+    font-size: clamp(27px, 7.8vw, 31px);
     line-height: 1;
   }
 
