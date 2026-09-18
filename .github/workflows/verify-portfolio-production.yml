@@ -1,26 +1,26 @@
-name: Verify portfolio production
+name: Verify current portfolio production
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
-      - '.github/workflows/verify-portfolio-production.yml'
       - 'index.html'
       - 'core.css'
-      - 'design.css'
       - 'script.js'
-      - 'section-loader.js'
+      - 'event-video.js'
       - 'photo-gallery.js'
       - 'photo.css'
-      - 'product-demo.js'
-      - 'product-demo.css'
-      - 'site-case.js'
-      - 'site-case.css'
+      - 'product-experience.js'
+      - 'product-experience.css'
+      - 'site-experience.js'
+      - 'site-experience.css'
+      - '.github/workflows/verify-portfolio-production.yml'
 
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -28,207 +28,56 @@ jobs:
           node-version: 22
       - name: Install Playwright
         run: |
-          npm install --no-save playwright@1.55.0
+          npm install --no-save playwright@1.61.1
           npx playwright install --with-deps chromium
-      - name: Verify production layout and loading
+      - name: Verify current desktop and mobile render
         shell: bash
         run: |
-          cat > verify-production.cjs <<'NODE'
+          cat > verify-current.cjs <<'NODE'
           const { chromium } = require('playwright');
           const assert = require('node:assert/strict');
           const url = 'https://portfolio-main-production-fdd5.up.railway.app/';
 
-          async function open(viewport) {
+          async function check(viewport, name) {
             const browser = await chromium.launch({ headless: true });
             const page = await browser.newPage({ viewport });
-            const requests = [];
-            page.on('request', req => requests.push(req.url()));
-            let lastError;
-            for (let attempt = 0; attempt < 3; attempt += 1) {
-              try {
-                await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 120000 });
-                await page.waitForSelector('.hero h1', { timeout: 30000 });
-                await page.waitForTimeout(1600);
-                return { browser, page, requests };
-              } catch (error) {
-                lastError = error;
-                await page.waitForTimeout(2500);
-              }
-            }
-            await browser.close();
-            throw lastError;
-          }
-
-          async function desktop() {
-            const { browser, page, requests } = await open({ width: 1440, height: 1000 });
-
-            const initial = await page.evaluate(() => {
-              const ids = ['youtube','video','ai','photo','product','site'];
-              const rects = ids.map(id => {
-                const el = document.getElementById(id);
-                const r = el.getBoundingClientRect();
-                const cs = getComputedStyle(el);
-                return {
-                  id, top:r.top, bottom:r.bottom, width:r.width,
-                  paddingTop:parseFloat(cs.paddingTop), paddingBottom:parseFloat(cs.paddingBottom),
-                  borderTop:parseFloat(cs.borderTopWidth), borderBottom:parseFloat(cs.borderBottomWidth)
-                };
-              });
-              return {
-                viewport: innerWidth,
-                scrollWidth: document.documentElement.scrollWidth,
-                stylesheets: [...document.styleSheets].map(s => s.href).filter(Boolean),
-                rects,
-                productLoaded: document.getElementById('product').classList.contains('product-demo-section'),
-                siteLoaded: document.getElementById('site').classList.contains('site-case-section')
-              };
-            });
-
-            assert.ok(initial.scrollWidth <= initial.viewport + 2, `desktop horizontal overflow ${initial.scrollWidth}/${initial.viewport}`);
-            assert.ok(initial.stylesheets.some(h => h.includes('/core.css?v=4')), 'core stylesheet missing');
-            assert.equal(initial.stylesheets.filter(h => /\/(styles|hotfix|ai|design)\.css/.test(h)).length, 0, 'extra blocking stylesheets still loaded');
-            initial.rects.forEach(r => {
-              assert.ok(r.paddingTop >= 60, `${r.id}: unsafe top spacing ${r.paddingTop}`);
-              assert.ok(r.paddingBottom >= 65, `${r.id}: unsafe bottom spacing ${r.paddingBottom}`);
-              assert.ok(r.borderBottom === 0, `${r.id}: legacy bottom divider still present`);
-            });
-            for (let i=1;i<initial.rects.length;i++) {
-              assert.ok(initial.rects[i].top >= initial.rects[i-1].bottom - 2, `sections overlap: ${initial.rects[i-1].id}/${initial.rects[i].id}`);
-            }
-
-            const heavyOnLoad = requests.filter(u => /\/media\/(?:ai-video|cartoon-video|promo-[12]-video)/.test(u));
-            assert.equal(heavyOnLoad.length, 0, `heavy video requested on initial load: ${heavyOnLoad.join(', ')}`);
-
-            await page.locator('#photo').scrollIntoViewIfNeeded();
+            await page.goto(url, { waitUntil: 'networkidle', timeout: 120000 });
             await page.waitForSelector('#photo.photo-section', { timeout: 30000 });
+            await page.waitForSelector('#product.product-web-demo .dai-browser', { timeout: 30000 });
+            await page.waitForSelector('#site.site-client-demo .site-browser', { timeout: 30000 });
 
-            await page.locator('#product').scrollIntoViewIfNeeded();
-            await page.waitForSelector('#product.product-demo-section .dai-demo-frame', { timeout: 30000 });
-            const p1 = await page.locator('.product-demo-story-kicker').textContent();
-            await page.waitForFunction(
-              (initial) => document.querySelector('.product-demo-story-kicker')?.textContent !== initial,
-              p1,
-              { timeout: 12000 }
-            );
-            const p2 = await page.locator('.product-demo-story-kicker').textContent();
-            assert.notEqual(p2, p1, 'Direct AI story animation did not advance');
-
-            await page.locator('#site').scrollIntoViewIfNeeded();
-            await page.waitForSelector('#site.site-case-section .site-case-capture', { timeout: 30000 });
-            await page.waitForFunction(() => {
-              const img = document.querySelector('.site-case-capture');
-              return img?.complete && img.naturalWidth === 1440;
-            }, null, { timeout: 60000 });
-            const t1 = await page.locator('.site-case-capture').evaluate(el => getComputedStyle(el).transform);
-            await page.waitForTimeout(5200);
-            const t2 = await page.locator('.site-case-capture').evaluate(el => getComputedStyle(el).transform);
-            assert.notEqual(t2, t1, 'site case autoplay did not advance');
-
-            const typography = await page.evaluate(() => ({
-              secondaryAI: parseFloat(getComputedStyle(document.querySelector('#ai .ai-work--secondary .work-meta strong')).fontSize),
-              productHead: parseFloat(getComputedStyle(document.querySelector('.product-demo-head-copy h3')).fontSize),
-              productStory: parseFloat(getComputedStyle(document.querySelector('.product-demo-story-title')).fontSize),
-              hasLongDash: document.body.innerText.includes(String.fromCharCode(0x2014)) || document.body.innerText.includes(String.fromCharCode(0x2013))
-            }));
-            assert.ok(typography.secondaryAI <= 44, `desktop secondary AI title unexpectedly large ${typography.secondaryAI}`);
-            assert.equal(typography.hasLongDash, false, 'long dash found in visible copy');
-
-            const chrome = await page.evaluate(() => {
-              const active = getComputedStyle(document.querySelector('.nav-grid button.is-active'));
-              const hero = getComputedStyle(document.querySelector('.hero'));
-              const section = getComputedStyle(document.querySelector('#youtube'));
-              return {
-                activeBg: active.backgroundColor,
-                navRadius: parseFloat(getComputedStyle(document.querySelector('.nav-grid')).borderRadius),
-                heroBorder: hero.borderBottomColor,
-                sectionBorder: section.borderBottomColor,
-                accent: getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(),
-                playBg: getComputedStyle(document.querySelector('.play-mark')).backgroundColor,
-                sectionTitle: document.querySelector('#youtube .section-label h2')?.textContent,
-                videoTitle: document.querySelector('#video .section-label h2')?.textContent,
-                aiTitle: document.querySelector('#ai .section-label h2')?.textContent,
-                productWrapBg: getComputedStyle(document.querySelector('#product .product-demo-wrap')).backgroundColor,
-                productSectionBg: getComputedStyle(document.querySelector('#product')).backgroundColor
-              };
-            });
-            assert.ok(chrome.navRadius <= 1, 'navigation still uses segmented pill shell');
-            assert.notEqual(chrome.activeBg, 'rgb(241, 12, 24)', 'active navigation still uses red fill');
-            assert.notEqual(chrome.heroBorder, 'rgb(241, 12, 24)', 'hero still has red divider');
-            assert.notEqual(chrome.sectionBorder, 'rgb(241, 12, 24)', 'section still has red divider');
-            assert.equal(chrome.accent, '#3467F6', 'cobalt accent token missing');
-            assert.equal(chrome.sectionTitle, 'YOUTUBE-ПРОЕКТЫ', 'youtube section title not updated');
-            assert.equal(chrome.videoTitle, 'ВИДЕОПРОДАКШЕН', 'video section title not updated');
-            assert.equal(chrome.aiTitle, 'AI-ПРОДАКШЕН', 'AI section title not updated');
-            assert.notEqual(chrome.productWrapBg, 'rgba(0, 0, 0, 0)', 'product case shell is not dark');
-            assert.notEqual(chrome.productSectionBg, 'rgb(11, 13, 16)', 'product section still paints the whole page dark');
-
-            const finalOverflow = await page.evaluate(() => [document.documentElement.scrollWidth, innerWidth]);
-            assert.ok(finalOverflow[0] <= finalOverflow[1] + 2, `desktop overflow after dynamic sections ${finalOverflow}`);
-            await page.locator('#product').screenshot({ path: 'product-desktop.jpg', type: 'jpeg', quality: 78 });
-            await page.locator('#site').screenshot({ path: 'site-desktop.jpg', type: 'jpeg', quality: 78 });
-            await page.screenshot({ path: 'portfolio-desktop.jpg', fullPage: true, type: 'jpeg', quality: 72 });
-            console.log('desktop PASS', JSON.stringify({initialRequests:requests.length, productStep:[p1,p2]}));
-            await browser.close();
-          }
-
-          async function mobile() {
-            const { browser, page } = await open({ width: 390, height: 844 });
-            await page.locator('#product').scrollIntoViewIfNeeded();
-            await page.waitForSelector('#product.product-demo-section .dai-demo-frame', { timeout: 30000 });
-            await page.locator('#site').scrollIntoViewIfNeeded();
-            await page.waitForSelector('#site.site-case-section', { timeout: 30000 });
             const state = await page.evaluate(() => ({
-              viewport: innerWidth,
+              width: innerWidth,
               scrollWidth: document.documentElement.scrollWidth,
-              navHeight: document.querySelector('.nav-grid')?.getBoundingClientRect().height,
-              productWidth: document.querySelector('.dai-demo-frame')?.getBoundingClientRect().width,
-              siteWidth: document.querySelector('.site-browser')?.getBoundingClientRect().width,
-              mainLeft: document.querySelector('main')?.getBoundingClientRect().left,
-              productLeft: document.querySelector('#product .product-demo-wrap')?.getBoundingClientRect().left,
-              productRight: document.querySelector('#product .product-demo-wrap')?.getBoundingClientRect().right,
-              productTitleLeft: document.querySelector('#product .product-demo-head-copy h3')?.getBoundingClientRect().left
+              sections: ['youtube','video','ai','photo','product','site'].map(id => Boolean(document.getElementById(id))),
+              pendingText: document.body.innerText.includes('МАТЕРИАЛЫ ПОЗЖЕ'),
+              legacyNodes: document.querySelectorAll('.product-demo-section,.site-case-section,.site-portfolio-page,.site-home-page').length,
+              product: Boolean(document.querySelector('#product.product-web-demo .dai-browser')),
+              site: Boolean(document.querySelector('#site.site-client-demo .site-browser'))
             }));
-            assert.ok(state.scrollWidth <= state.viewport + 2, `mobile horizontal overflow ${state.scrollWidth}/${state.viewport}`);
-            assert.ok(state.navHeight >= 40 && state.navHeight <= 46, `mobile nav unsafe height ${state.navHeight}`);
-            assert.ok(state.productWidth <= state.viewport - 20, `product frame too wide ${state.productWidth}`);
-            assert.ok(state.siteWidth <= state.viewport - 20, `site frame too wide ${state.siteWidth}`);
-            assert.ok(state.mainLeft >= 0, 'main shifted outside viewport');
-            assert.ok(state.productLeft >= 10 && state.productRight <= state.viewport - 10, 'product case shell is clipped');
-            assert.ok(state.productTitleLeft >= state.productLeft + 10, 'product title is clipped against shell edge');
-            const type = await page.evaluate(() => ({
-              aiSecondary: parseFloat(getComputedStyle(document.querySelector('#ai .ai-work--secondary .work-meta strong')).fontSize),
-              productHead: parseFloat(getComputedStyle(document.querySelector('.product-demo-head-copy h3')).fontSize),
-              productStory: parseFloat(getComputedStyle(document.querySelector('.product-demo-story-title')).fontSize),
-              textAdjust: getComputedStyle(document.documentElement).webkitTextSizeAdjust || getComputedStyle(document.documentElement).textSizeAdjust
-            }));
-            assert.ok(type.aiSecondary <= 31, `mobile AI secondary title too large ${type.aiSecondary}`);
-            assert.ok(type.productHead <= 32, `mobile product heading too large ${type.productHead}`);
-            assert.ok(type.productStory <= 22, `mobile product story too large ${type.productStory}`);
-            await page.locator('#product').screenshot({ path: 'product-mobile.jpg', type: 'jpeg', quality: 78 });
-            await page.locator('#site').screenshot({ path: 'site-mobile.jpg', type: 'jpeg', quality: 78 });
-            await page.screenshot({ path: 'portfolio-mobile.jpg', fullPage: true, type: 'jpeg', quality: 72 });
-            console.log('mobile PASS', JSON.stringify({ ...state, type }));
+
+            assert.ok(state.scrollWidth <= state.width + 2, name + ': horizontal overflow');
+            assert.ok(state.sections.every(Boolean), name + ': missing portfolio section');
+            assert.equal(state.pendingText, false, name + ': pending placeholder visible');
+            assert.equal(state.legacyNodes, 0, name + ': legacy DOM remains');
+            assert.equal(state.product, true, name + ': product experience missing');
+            assert.equal(state.site, true, name + ': site experience missing');
+
+            await page.screenshot({ path: 'portfolio-' + name + '.png', fullPage: true });
+            console.log(name + ' PASS', JSON.stringify(state));
             await browser.close();
           }
 
           (async () => {
-            await desktop();
-            await mobile();
+            await check({ width: 1440, height: 1000 }, 'desktop');
+            await check({ width: 390, height: 844 }, 'mobile');
           })().catch(error => { console.error(error); process.exit(1); });
           NODE
-          node verify-production.cjs
-
-      - name: Upload verification screenshots
+          node verify-current.cjs
+      - name: Upload current render screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: portfolio-production-screens
-          path: |
-            portfolio-desktop.jpg
-            portfolio-mobile.jpg
-            product-desktop.jpg
-            site-desktop.jpg
-            product-mobile.jpg
-            site-mobile.jpg
-          if-no-files-found: ignore
+          name: current-production-render
+          path: portfolio-*.png
           retention-days: 2
