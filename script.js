@@ -95,8 +95,25 @@ function renderYoutube(index) {
   $("#viewer-source").href = `https://www.youtube.com/watch?v=${work.id}`;
   $("#viewer-count").textContent = `${String(index + 1).padStart(2, "0")} / ${String(works.length).padStart(2, "0")}`;
   $("#viewer-controls").hidden = false;
-  $("#viewer-frame").innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${work.id}?autoplay=1&rel=0&playsinline=1&modestbranding=1" title="${work.fullTitle.replaceAll('"', '&quot;')}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
 
+  const params = new URLSearchParams({
+    autoplay: "1",
+    rel: "0",
+    playsinline: "1",
+    modestbranding: "1",
+    enablejsapi: "1",
+    origin: window.location.origin
+  });
+
+  const iframe = document.createElement("iframe");
+  iframe.src = `https://www.youtube.com/embed/${work.id}?${params.toString()}`;
+  iframe.title = work.fullTitle;
+  iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+  iframe.allowFullscreen = true;
+  iframe.referrerPolicy = "strict-origin-when-cross-origin";
+  iframe.loading = "eager";
+
+  $("#viewer-frame").replaceChildren(iframe);
   openViewer();
 }
 
