@@ -100,8 +100,11 @@
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function resize() {
-    scale = (stage.clientWidth || 1) / BASE_W;
+    const mobileCamera = window.innerWidth <= 900;
+    const virtualWidth = mobileCamera ? 1080 : BASE_W;
+    scale = (stage.clientWidth || 1) / virtualWidth;
     canvas.style.transform = "scale(" + scale + ")";
+    canvas.style.left = mobileCamera ? (-((BASE_W - virtualWidth) / 2) * scale) + "px" : "0px";
     stage.style.height = (BASE_H * scale) + "px";
   }
   new ResizeObserver(resize).observe(stage);
@@ -154,7 +157,7 @@
     for (let i = 0; i <= text.length; i += 1) {
       if (!visible || token !== run) return false;
       input.textContent = text.slice(0, i);
-      await new Promise(r => setTimeout(r, 34));
+      await new Promise(r => setTimeout(r, 82));
     }
     caret.classList.remove("is-visible");
     return true;
@@ -163,7 +166,7 @@
   async function clickNav(name, token) {
     const el = allTargets.find(x => x.dataset.daiNav === name && x.closest(".dai-appnav"));
     moveCursorTo(el);
-    if (!(await sleep(520, token))) return false;
+    if (!(await sleep(900, token))) return false;
     clickCursor();
     if (!(await sleep(230, token))) return false;
     show(name);
@@ -174,42 +177,42 @@
     show("agent");
     resetAgent();
     cursor.classList.remove("is-visible");
-    if (!(await sleep(1200, token))) return;
+    if (!(await sleep(2600, token))) return;
 
     moveCursorTo(composer);
-    if (!(await sleep(450, token))) return;
+    if (!(await sleep(850, token))) return;
     clickCursor();
     if (!(await typeText("Проверь рекламный кабинет", token))) return;
 
     moveCursorTo(composer.querySelector("b"));
-    if (!(await sleep(420, token))) return;
+    if (!(await sleep(760, token))) return;
     clickCursor();
     review.classList.add("is-visible");
-    if (!(await sleep(1800, token))) return;
+    if (!(await sleep(3000, token))) return;
     review.classList.add("is-complete");
     result.classList.add("is-visible");
-    if (!(await sleep(1600, token))) return;
+    if (!(await sleep(2400, token))) return;
 
     if (!(await clickNav("overview", token))) return;
     if (!(await sleep(1900, token))) return;
 
     if (!(await clickNav("campaigns", token))) return;
-    if (!(await sleep(2100, token))) return;
+    if (!(await sleep(2900, token))) return;
 
     const solution = section.querySelector('.dai-alert [data-dai-nav="decisions"]');
     moveCursorTo(solution);
-    if (!(await sleep(500, token))) return;
+    if (!(await sleep(900, token))) return;
     clickCursor();
     if (!(await sleep(230, token))) return;
     show("decisions");
-    if (!(await sleep(1300, token))) return;
+    if (!(await sleep(2100, token))) return;
 
     moveCursorTo(confirm);
     if (!(await sleep(500, token))) return;
     clickCursor();
     confirm.classList.add("is-pressed");
     success.classList.add("is-visible");
-    if (!(await sleep(2300, token))) return;
+    if (!(await sleep(3200, token))) return;
 
     if (visible && token === run) sequence(token);
   }
