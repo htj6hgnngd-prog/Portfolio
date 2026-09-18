@@ -7,6 +7,7 @@ on:
       - '.github/workflows/verify-portfolio-production.yml'
       - 'index.html'
       - 'core.css'
+      - 'design.css'
       - 'script.js'
       - 'section-loader.js'
       - 'photo-gallery.js'
@@ -42,10 +43,20 @@ jobs:
             const page = await browser.newPage({ viewport });
             const requests = [];
             page.on('request', req => requests.push(req.url()));
-            await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 120000 });
-            await page.waitForSelector('.hero h1', { timeout: 30000 });
-            await page.waitForTimeout(1600);
-            return { browser, page, requests };
+            let lastError;
+            for (let attempt = 0; attempt < 3; attempt += 1) {
+              try {
+                await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 120000 });
+                await page.waitForSelector('.hero h1', { timeout: 30000 });
+                await page.waitForTimeout(1600);
+                return { browser, page, requests };
+              } catch (error) {
+                lastError = error;
+                await page.waitForTimeout(2500);
+              }
+            }
+            await browser.close();
+            throw lastError;
           }
 
           async function desktop() {
@@ -60,7 +71,7 @@ jobs:
                 return {
                   id, top:r.top, bottom:r.bottom, width:r.width,
                   paddingTop:parseFloat(cs.paddingTop), paddingBottom:parseFloat(cs.paddingBottom),
-                  borderBottom:parseFloat(cs.borderBottomWidth)
+                  borderTop:parseFloat(cs.borderTopWidth), borderBottom:parseFloat(cs.borderBottomWidth)
                 };
               });
               return {
@@ -75,11 +86,12 @@ jobs:
 
             assert.ok(initial.scrollWidth <= initial.viewport + 2, `desktop horizontal overflow ${initial.scrollWidth}/${initial.viewport}`);
             assert.ok(initial.stylesheets.some(h => h.includes('/core.css?v=3')), 'core stylesheet missing');
+            assert.ok(initial.stylesheets.some(h => h.includes('/design.css?v=1')), 'premium design stylesheet missing');
             assert.equal(initial.stylesheets.filter(h => /\/(styles|hotfix|ai)\.css/.test(h)).length, 0, 'old blocking stylesheets still loaded');
             initial.rects.forEach(r => {
-              assert.ok(r.paddingTop >= 40, `${r.id}: unsafe top spacing ${r.paddingTop}`);
-              assert.ok(r.paddingBottom >= 45, `${r.id}: unsafe bottom spacing ${r.paddingBottom}`);
-              assert.ok(r.borderBottom >= 1, `${r.id}: section divider missing`);
+              assert.ok(r.paddingTop >= 60, `${r.id}: unsafe top spacing ${r.paddingTop}`);
+              assert.ok(r.paddingBottom >= 65, `${r.id}: unsafe bottom spacing ${r.paddingBottom}`);
+              assert.ok(r.borderBottom === 0, `${r.id}: legacy bottom divider still present`);
             });
             for (let i=1;i<initial.rects.length;i++) {
               assert.ok(initial.rects[i].top >= initial.rects[i-1].bottom - 2, `sections overlap: ${initial.rects[i-1].id}/${initial.rects[i].id}`);
@@ -130,16 +142,26 @@ jobs:
                 activeBg: active.backgroundColor,
                 navRadius: parseFloat(getComputedStyle(document.querySelector('.nav-grid')).borderRadius),
                 heroBorder: hero.borderBottomColor,
-                sectionBorder: section.borderBottomColor
+                sectionBorder: section.borderBottomColor,
+                accent: getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(),
+                playBg: getComputedStyle(document.querySelector('.play-mark')).backgroundColor,
+                sectionTitle: document.querySelector('#youtube .section-label h2')?.textContent,
+                videoTitle: document.querySelector('#video .section-label h2')?.textContent,
+                aiTitle: document.querySelector('#ai .section-label h2')?.textContent
               };
             });
             assert.ok(chrome.navRadius >= 14, 'navigation is not rounded');
             assert.notEqual(chrome.activeBg, 'rgb(241, 12, 24)', 'active navigation still uses red fill');
             assert.notEqual(chrome.heroBorder, 'rgb(241, 12, 24)', 'hero still has red divider');
             assert.notEqual(chrome.sectionBorder, 'rgb(241, 12, 24)', 'section still has red divider');
+            assert.equal(chrome.accent, '#3467F6', 'cobalt accent token missing');
+            assert.equal(chrome.sectionTitle, 'YOUTUBE-ПРОЕКТЫ', 'youtube section title not updated');
+            assert.equal(chrome.videoTitle, 'ВИДЕОПРОДАКШЕН', 'video section title not updated');
+            assert.equal(chrome.aiTitle, 'AI-ПРОДАКШЕН', 'AI section title not updated');
 
             const finalOverflow = await page.evaluate(() => [document.documentElement.scrollWidth, innerWidth]);
             assert.ok(finalOverflow[0] <= finalOverflow[1] + 2, `desktop overflow after dynamic sections ${finalOverflow}`);
+            await page.screenshot({ path: 'portfolio-desktop.jpg', fullPage: true, type: 'jpeg', quality: 72 });
             console.log('desktop PASS', JSON.stringify({initialRequests:requests.length, productStep:[p1,p2]}));
             await browser.close();
           }
@@ -159,7 +181,7 @@ jobs:
               mainLeft: document.querySelector('main')?.getBoundingClientRect().left
             }));
             assert.ok(state.scrollWidth <= state.viewport + 2, `mobile horizontal overflow ${state.scrollWidth}/${state.viewport}`);
-            assert.ok(state.navHeight >= 44 && state.navHeight <= 54, `mobile nav unsafe height ${state.navHeight}`);
+            assert.ok(state.navHeight >= 44 && state.navHeight <= 50, `mobile nav unsafe height ${state.navHeight}`);
             assert.ok(state.productWidth <= state.viewport - 20, `product frame too wide ${state.productWidth}`);
             assert.ok(state.siteWidth <= state.viewport - 20, `site frame too wide ${state.siteWidth}`);
             assert.ok(state.mainLeft >= 0, 'main shifted outside viewport');
@@ -172,6 +194,7 @@ jobs:
             assert.ok(type.aiSecondary <= 31, `mobile AI secondary title too large ${type.aiSecondary}`);
             assert.ok(type.productHead <= 32, `mobile product heading too large ${type.productHead}`);
             assert.ok(type.productStory <= 22, `mobile product story too large ${type.productStory}`);
+            await page.screenshot({ path: 'portfolio-mobile.jpg', fullPage: true, type: 'jpeg', quality: 72 });
             console.log('mobile PASS', JSON.stringify({ ...state, type }));
             await browser.close();
           }
@@ -182,3 +205,14 @@ jobs:
           })().catch(error => { console.error(error); process.exit(1); });
           NODE
           node verify-production.cjs
+
+      - name: Upload verification screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: portfolio-production-screens
+          path: |
+            portfolio-desktop.jpg
+            portfolio-mobile.jpg
+          if-no-files-found: ignore
+          retention-days: 2
