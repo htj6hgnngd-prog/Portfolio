@@ -28,7 +28,7 @@
 
               '<div class="site-photo-viewer" aria-hidden="true">',
                 '<button type="button" class="site-photo-close">×</button>',
-                '<img src="https://static.tildacdn.com/tild6366-3163-4233-b331-396366363230/5.jpg" alt="Свадебный кадр Denisov Photo">',
+                '<img src="https://static.tildacdn.com/tild3137-6338-4162-b735-363931303032/30.jpg" alt="Свадебный кадр Denisov Photo">',
                 '<div class="site-photo-meta"><span>СВАДЕБНАЯ ИСТОРИЯ</span><strong>DENISOV PHOTO</strong></div>',
               '</div>',
 
