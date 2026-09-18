@@ -185,5 +185,5 @@ const server = http.createServer(async (req, res) => {
 server.listen(externalPort, "0.0.0.0", () => {
   console.log(`Portfolio proxy listening on ${externalPort}, internal app on ${internalPort}`);
   setTimeout(prepareSiteCaptureInBackground, 250).unref();
-  setTimeout(prepareEventMediaInBackground, 1500).unref();
+  setTimeout(prepareEventMediaInBackground, 12000).unref();
 });
