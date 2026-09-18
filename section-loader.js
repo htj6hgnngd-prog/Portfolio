@@ -40,11 +40,11 @@
 
   near("photo", 1200, () => import("/photo-gallery.js?v=6"));
   near("product", 1900, async () => {
-    await loadStyle("/product-experience.css?v=2");
-    await import("/product-experience.js?v=2");
+    await loadStyle("/product-experience.css?v=3");
+    await import("/product-experience.js?v=3");
   });
   near("site", 2100, async () => {
-    await loadStyle("/site-experience.css?v=2");
-    await import("/site-experience.js?v=2");
+    await loadStyle("/site-experience.css?v=3");
+    await import("/site-experience.js?v=3");
   });
 })();
