@@ -24,52 +24,15 @@
         '<div class="site-stage">',
           '<div class="site-canvas">',
             '<div class="site-live-viewport">',
+              '<img class="site-long-page" src="/assets/site-case/denisovphoto-desktop.png?v=1" alt="Denisov Photo desktop website" decoding="async">',
 
-              '<div class="site-home-page is-active" data-site-scene="home">',
-                '<img class="site-long-page" src="/assets/site-case/denisovphoto-desktop.png?v=1" alt="Denisov Photo desktop website" decoding="async">',
+              '<div class="site-photo-viewer" aria-hidden="true">',
+                '<button type="button" class="site-photo-close">×</button>',
+                '<img src="https://static.tildacdn.com/tild6366-3163-4233-b331-396366363230/5.jpg" alt="Свадебный кадр Denisov Photo">',
+                '<div class="site-photo-meta"><span>СВАДЕБНАЯ ИСТОРИЯ</span><strong>DENISOV PHOTO</strong></div>',
               '</div>',
 
-              '<div class="site-portfolio-page" data-site-scene="portfolio">',
-                '<div class="site-portfolio-scroll">',
-                  '<header class="site-real-nav">',
-                    '<strong>DENISOV PHOTO</strong>',
-                    '<span>ГЛАВНАЯ</span><span>ПАКЕТЫ</span><span>PHOTO &amp; FILM</span><span class="is-current">СВАДЕБНЫЕ ИСТОРИИ</span>',
-                    '<button type="button" class="site-date-trigger">ПРОВЕРИТЬ ДАТУ</button>',
-                  '</header>',
-
-                  '<section class="site-portfolio-hero">',
-                    '<div class="site-portfolio-hero-copy">',
-                      '<small>СВАДЕБНЫЕ ИСТОРИИ</small>',
-                      '<h3>Свадьбы<br>в кадре</h3>',
-                      '<p>Атмосфера, эмоции и стиль — в реальных свадебных историях.</p>',
-                    '</div>',
-                    '<img src="https://res.cloudinary.com/dxqtfevzq/image/upload/q_auto/f_auto/v1780311378/23_ptrusy.png" alt="">',
-                  '</section>',
-
-                  '<section class="site-portfolio-grid-section">',
-                    '<div class="site-portfolio-title"><small>ПОРТФОЛИО</small><h4>Портреты, детали и моменты</h4></div>',
-                    '<div class="site-web-gallery">',
-                      '<figure class="wide"><img src="https://res.cloudinary.com/dxqtfevzq/image/upload/q_auto/f_auto/v1780311386/29_u5qbma.png" alt=""></figure>',
-                      '<figure><img src="https://res.cloudinary.com/dxqtfevzq/image/upload/q_auto/f_auto/v1780311340/4_%D1%82%D0%B5%D1%81%D1%82_xuw8jq.png" alt=""></figure>',
-                      '<figure><img src="https://res.cloudinary.com/dxqtfevzq/image/upload/q_auto/f_auto/v1780311356/13_cq9rxf.png" alt=""></figure>',
-                      '<figure class="wide"><img src="https://res.cloudinary.com/dxqtfevzq/image/upload/q_auto/f_auto/v1780311389/30_ct4kt7.png" alt=""></figure>',
-                      '<figure><img src="https://res.cloudinary.com/dxqtfevzq/image/upload/q_auto/f_auto/v1780311348/9_gszahn.png" alt=""></figure>',
-                      '<figure><img src="https://res.cloudinary.com/dxqtfevzq/image/upload/q_auto/f_auto/v1780311366/17_oig08y.png" alt=""></figure>',
-                      '<figure class="wide"><img src="https://res.cloudinary.com/dxqtfevzq/image/upload/q_auto/f_auto/v1780311350/10_z9txch.png" alt=""></figure>',
-                      '<figure class="wide"><img src="https://res.cloudinary.com/dxqtfevzq/image/upload/q_auto/f_auto/v1780311399/35_spasha.png" alt=""></figure>',
-                    '</div>',
-                  '</section>',
-
-                  '<section class="site-portfolio-footer-cta">',
-                    '<small>ПРОВЕРКА ДАТЫ</small>',
-                    '<h4>Такая съёмка возможна и на вашей свадьбе</h4>',
-                    '<p>Проверьте дату — я быстро отвечу, свободен ли день, и подскажу подходящий формат.</p>',
-                    '<button type="button" class="site-date-trigger">ПРОВЕРИТЬ ДАТУ</button>',
-                  '</section>',
-                '</div>',
-              '</div>',
-
-              '<div class="site-form-overlay">',
+              '<div class="site-form-overlay" aria-hidden="true">',
                 '<div class="site-form-card">',
                   '<button type="button" class="site-form-close">×</button>',
                   '<small>СВОБОДНЫЕ ДАТЫ</small>',
@@ -79,7 +42,7 @@
                   '<label><span>Телефон</span><input data-demo-field="phone" readonly></label>',
                   '<label><span>Telegram</span><input data-demo-field="telegram" readonly></label>',
                   '<label><span>Дата свадьбы</span><input data-demo-field="date" readonly></label>',
-                  '<label class="site-consent"><i></i><span>Согласие на обработку персональных данных</span></label>',
+                  '<label class="site-consent"><i></i><span>Я даю согласие на обработку персональных данных</span></label>',
                   '<button type="button" class="site-submit-demo">ПРОВЕРИТЬ ДАТУ</button>',
                   '<div class="site-form-success"><i>✓</i><div><strong>Заявка отправлена</strong><span>Спасибо. Дата отправлена на проверку.</span></div></div>',
                 '</div>',
@@ -99,14 +62,12 @@
   const browser = section.querySelector(".site-browser");
   const stage = section.querySelector(".site-stage");
   const canvas = section.querySelector(".site-canvas");
-  const homeScene = section.querySelector('[data-site-scene="home"]');
-  const portfolioScene = section.querySelector('[data-site-scene="portfolio"]');
-  const homePage = section.querySelector(".site-long-page");
-  const portfolioScroll = section.querySelector(".site-portfolio-scroll");
+  const page = section.querySelector(".site-long-page");
   const cursor = section.querySelector(".site-cursor");
+  const viewer = section.querySelector(".site-photo-viewer");
+  const viewerClose = section.querySelector(".site-photo-close");
   const form = section.querySelector(".site-form-overlay");
   const formClose = section.querySelector(".site-form-close");
-  const dateTriggers = [...section.querySelectorAll(".site-date-trigger")];
   const consent = section.querySelector(".site-consent");
   const submit = section.querySelector(".site-submit-demo");
   const formSuccess = section.querySelector(".site-form-success");
@@ -118,7 +79,7 @@
     date: section.querySelector('[data-demo-field="date"]')
   };
 
-  if (!browser || !stage || !canvas || !homeScene || !portfolioScene || !homePage || !portfolioScroll || !cursor || !form || !submit || !formSuccess) return;
+  if (!browser || !stage || !canvas || !page || !cursor || !viewer || !form || !submit || !formSuccess) return;
 
   let scale = 1;
   let visible = false;
@@ -139,24 +100,14 @@
     return new Promise(resolve => setTimeout(() => resolve(token === run && visible), ms));
   }
 
-  function homeTravel() {
-    return Math.max(0, homePage.offsetHeight - BASE_H);
+  function maxTravel() {
+    return Math.max(0, page.offsetHeight - BASE_H);
   }
 
-  function portfolioTravel() {
-    return Math.max(0, portfolioScroll.offsetHeight - BASE_H);
-  }
-
-  function moveHome(fraction, duration) {
-    const y = -homeTravel() * Math.max(0, Math.min(1, fraction));
-    homePage.style.transitionDuration = duration + "ms";
-    homePage.style.transform = "translate3d(0," + y + "px,0)";
-  }
-
-  function movePortfolio(fraction, duration) {
-    const y = -portfolioTravel() * Math.max(0, Math.min(1, fraction));
-    portfolioScroll.style.transitionDuration = duration + "ms";
-    portfolioScroll.style.transform = "translate3d(0," + y + "px,0)";
+  function scrollToFraction(fraction, duration) {
+    const y = -maxTravel() * Math.max(0, Math.min(1, fraction));
+    page.style.transitionDuration = duration + "ms";
+    page.style.transform = "translate3d(0," + y + "px,0)";
   }
 
   function moveCursor(x, y) {
@@ -171,38 +122,49 @@
     cursor.classList.add("is-clicking");
   }
 
-  function showScene(name) {
-    const isHome = name === "home";
-    homeScene.classList.toggle("is-active", isHome);
-    portfolioScene.classList.toggle("is-active", !isHome);
+  function openViewer() {
+    viewer.classList.add("is-open");
+    viewer.setAttribute("aria-hidden", "false");
+  }
+
+  function closeViewer() {
+    viewer.classList.remove("is-open");
+    viewer.setAttribute("aria-hidden", "true");
+  }
+
+  function openForm() {
+    form.classList.add("is-open");
+    form.setAttribute("aria-hidden", "false");
+  }
+
+  function closeForm() {
+    form.classList.remove("is-open");
+    form.setAttribute("aria-hidden", "true");
   }
 
   async function typeField(input, value, token) {
     if (!input) return false;
+
     input.classList.add("is-active");
     input.value = "";
 
     for (let i = 0; i <= value.length; i += 1) {
       if (!visible || token !== run) return false;
       input.value = value.slice(0, i);
-      await new Promise(r => setTimeout(r, 115));
+      await new Promise(resolve => setTimeout(resolve, 125));
     }
 
     input.classList.remove("is-active");
-    if (!(await sleep(420, token))) return false;
-    return true;
+    return sleep(650, token);
   }
 
   function reset() {
-    showScene("home");
+    page.style.transitionDuration = "0ms";
+    page.style.transform = "translate3d(0,0,0)";
 
-    homePage.style.transitionDuration = "0ms";
-    homePage.style.transform = "translate3d(0,0,0)";
+    closeViewer();
+    closeForm();
 
-    portfolioScroll.style.transitionDuration = "0ms";
-    portfolioScroll.style.transform = "translate3d(0,0,0)";
-
-    form.classList.remove("is-open");
     consent.classList.remove("is-checked");
     submit.classList.remove("is-pressed");
     formSuccess.classList.remove("is-visible");
@@ -217,110 +179,107 @@
     cursor.classList.remove("is-visible");
   }
 
-  async function openForm(token) {
-    form.classList.add("is-open");
+  async function fillForm(token) {
     if (!(await sleep(1500, token))) return false;
 
-    moveCursor(805, 338);
-    if (!(await sleep(850, token))) return false;
+    moveCursor(800, 350);
+    if (!(await sleep(1000, token))) return false;
     if (!(await typeField(fields.name, "Анна", token))) return false;
 
-    moveCursor(805, 445);
-    if (!(await sleep(850, token))) return false;
+    moveCursor(800, 455);
+    if (!(await sleep(1000, token))) return false;
     if (!(await typeField(fields.phone, "+7 999 123-45-67", token))) return false;
 
-    moveCursor(805, 552);
-    if (!(await sleep(850, token))) return false;
+    moveCursor(800, 560);
+    if (!(await sleep(1000, token))) return false;
     if (!(await typeField(fields.telegram, "@anna", token))) return false;
 
-    moveCursor(805, 659);
-    if (!(await sleep(850, token))) return false;
+    moveCursor(800, 665);
+    if (!(await sleep(1000, token))) return false;
     if (!(await typeField(fields.date, "12-09-2027", token))) return false;
 
-    moveCursor(535, 742);
-    if (!(await sleep(900, token))) return false;
+    moveCursor(530, 742);
+    if (!(await sleep(1100, token))) return false;
     clickCursor();
     consent.classList.add("is-checked");
 
-    if (!(await sleep(1100, token))) return false;
+    if (!(await sleep(1300, token))) return false;
 
     moveCursor(760, 812);
-    if (!(await sleep(900, token))) return false;
+    if (!(await sleep(1100, token))) return false;
     clickCursor();
     submit.classList.add("is-pressed");
     formSuccess.classList.add("is-visible");
 
-    if (!(await sleep(3600, token))) return false;
-    return true;
+    return sleep(4200, token);
   }
 
   async function sequence(token) {
     reset();
-    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
-    if (!(await sleep(2200, token))) return;
+    if (!(await sleep(2400, token))) return;
 
-    moveCursor(1080, 605);
+    moveCursor(1090, 610);
+    if (!(await sleep(1200, token))) return;
+
+    // Пакеты / преимущества
+    scrollToFraction(.20, 4800);
+    if (!(await sleep(5900, token))) return;
+
+    moveCursor(1040, 605);
     if (!(await sleep(1100, token))) return;
-    moveHome(.16, 3600);
 
-    if (!(await sleep(4500, token))) return;
+    // Editorial mood / Смотреть кадры
+    scrollToFraction(.47, 5600);
+    if (!(await sleep(6700, token))) return;
 
-    moveCursor(1030, 610);
-    if (!(await sleep(1000, token))) return;
-    moveHome(.58, 5200);
-
-    if (!(await sleep(6100, token))) return;
-
-    moveCursor(1040, 620);
-    if (!(await sleep(1100, token))) return;
-    clickCursor();
-
-    if (!(await sleep(700, token))) return;
-    showScene("portfolio");
-
-    if (!(await sleep(2600, token))) return;
-
-    moveCursor(1110, 620);
-    if (!(await sleep(1000, token))) return;
-    movePortfolio(.44, 4700);
-
-    if (!(await sleep(5600, token))) return;
-
-    moveCursor(1080, 610);
-    if (!(await sleep(900, token))) return;
-    movePortfolio(.82, 4200);
-
-    if (!(await sleep(5000, token))) return;
-
-    const finalTrigger = section.querySelector(".site-portfolio-footer-cta .site-date-trigger");
-    if (finalTrigger) {
-      const c = canvas.getBoundingClientRect();
-      const r = finalTrigger.getBoundingClientRect();
-      moveCursor(
-        (r.left - c.left + r.width * .66) / scale,
-        (r.top - c.top + r.height * .62) / scale
-      );
-    } else {
-      moveCursor(980, 690);
-    }
-
+    // Клик по реальному CTA "Смотреть кадры"
+    moveCursor(360, 690);
     if (!(await sleep(1300, token))) return;
     clickCursor();
+    openViewer();
 
-    if (!(await sleep(650, token))) return;
-    if (!(await openForm(token))) return;
+    if (!(await sleep(3600, token))) return;
+
+    moveCursor(1364, 58);
+    if (!(await sleep(1200, token))) return;
+    clickCursor();
+    closeViewer();
+
+    if (!(await sleep(1100, token))) return;
+
+    // Реальный блок "Свадебные истории"
+    scrollToFraction(.78, 6200);
+    if (!(await sleep(7400, token))) return;
+
+    moveCursor(980, 590);
+    if (!(await sleep(1300, token))) return;
+
+    // Небольшой дополнительный проход по реальному портфолио
+    scrollToFraction(.88, 4200);
+    if (!(await sleep(5200, token))) return;
+
+    // Реальный финальный CTA проверки даты
+    scrollToFraction(1, 4500);
+    if (!(await sleep(5600, token))) return;
+
+    moveCursor(1010, 675);
+    if (!(await sleep(1400, token))) return;
+    clickCursor();
+    openForm();
+
+    if (!(await fillForm(token))) return;
 
     if (visible && token === run) sequence(token);
   }
 
-  dateTriggers.forEach(button => button.addEventListener("click", () => {
-    run += 1;
-    form.classList.add("is-open");
-  }));
+  viewerClose.addEventListener("click", closeViewer);
+  formClose.addEventListener("click", closeForm);
 
-  formClose.addEventListener("click", () => form.classList.remove("is-open"));
-  consent.addEventListener("click", () => consent.classList.toggle("is-checked"));
+  consent.addEventListener("click", () => {
+    consent.classList.toggle("is-checked");
+  });
 
   submit.addEventListener("click", () => {
     submit.classList.add("is-pressed");
@@ -332,12 +291,14 @@
     run += 1;
     reset();
 
-    if (visible && !reduced && homePage.complete) sequence(run);
+    if (visible && !reduced && page.complete) {
+      sequence(run);
+    }
   }, { threshold: .28 });
 
   observer.observe(browser);
 
-  homePage.addEventListener("load", () => {
+  page.addEventListener("load", () => {
     if (visible && !reduced) {
       run += 1;
       sequence(run);
