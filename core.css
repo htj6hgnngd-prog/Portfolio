@@ -25,7 +25,7 @@ main{padding:0 max(24px,env(safe-area-inset-right)) 112px max(24px,env(safe-area
   .ai-work--primary{grid-column:1/-1;width:100%}
   .ai-work--primary .work-meta strong{font-size:clamp(29px,2.7vw,42px);font-weight:680;line-height:.95;letter-spacing:-.04em}
   .ai-work--secondary{grid-column:3;width:100%;margin:26px 0 0}
-  .ai-work--secondary .media-frame{border-radius:7px}
+  .ai-work--secondary .media-frame{width:100%;height:auto;aspect-ratio:16/9!important;border-radius:7px}
   .ai-work--secondary .play-mark{width:38px;height:38px}
   .ai-work--secondary .play-mark>span{border-top-width:4px;border-bottom-width:4px;border-left-width:7px}
   .ai-work--secondary .work-meta{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:10px 2px 0}
