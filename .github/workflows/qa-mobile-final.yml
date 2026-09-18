@@ -1,0 +1,74 @@
+name: QA mobile production
+on:
+  push:
+    branches: ['qa-mobile-final-1789708109307']
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps webkit
+      - name: Verify mobile production in WebKit
+        run: |
+          cat > qa-mobile.cjs <<'NODE'
+          const { webkit }=require('playwright');
+          const assert=require('node:assert/strict');
+          const url='https://portfolio-main-production-fdd5.up.railway.app/';
+          (async()=>{
+            const b=await webkit.launch({headless:true});
+            const p=await b.newPage({
+              viewport:{width:390,height:844},
+              deviceScaleFactor:3,
+              isMobile:true,
+              hasTouch:true,
+              reducedMotion:'reduce'
+            });
+            const errors=[];p.on('pageerror',e=>errors.push(e.message));
+            await p.goto(url,{waitUntil:'networkidle',timeout:120000});
+            const state=await p.evaluate(()=>({
+              width:document.documentElement.clientWidth,
+              scrollWidth:document.documentElement.scrollWidth,
+              photo:document.querySelector('#photo .section-label h2')?.textContent,
+              product:!!document.querySelector('#product .dai-browser'),
+              site:!!document.querySelector('#site .site-browser')
+            }));
+            assert.ok(state.scrollWidth<=state.width+2,'mobile horizontal overflow');
+            assert.equal(state.photo,'ФОТО');
+            assert.equal(state.product,true);
+            assert.equal(state.site,true);
+
+            await p.locator('#youtube-featured').click();
+            await p.waitForSelector('#viewer.is-open iframe',{timeout:30000});
+            await p.locator('#viewer-close').click();
+            await p.waitForSelector('#viewer',{state:'hidden'});
+
+            await p.locator('[data-event-work="promo1"]').click();
+            await p.waitForSelector('#viewer.is-open .event-viewer-video',{timeout:30000});
+            await p.waitForFunction(()=>{const v=document.querySelector('#viewer .event-viewer-video');return v&&v.readyState>=1&&v.videoWidth>0&&!v.error},{timeout:30000});
+            await p.locator('#viewer-close').click();
+            await p.waitForSelector('#viewer',{state:'hidden'});
+
+            await p.locator('[data-event-work="promo2"]').click();
+            await p.waitForSelector('#viewer.is-open .event-viewer-video',{timeout:30000});
+            await p.waitForFunction(()=>{const v=document.querySelector('#viewer .event-viewer-video');return v&&v.readyState>=1&&v.videoWidth>0&&!v.error},{timeout:30000});
+            await p.locator('#viewer-close').click();
+            await p.waitForSelector('#viewer',{state:'hidden'});
+
+            await p.locator('[data-ai-work="cartoon"]').click();
+            await p.waitForSelector('#viewer.is-open #ai-cartoon-player',{timeout:30000});
+            await p.evaluate(async()=>{const v=document.querySelector('#viewer #ai-cartoon-player');v.muted=true;await v.play()});
+            await p.waitForFunction(()=>{const v=document.querySelector('#viewer #ai-cartoon-player');return v&&v.currentTime>0.5&&v.videoWidth>0&&!v.error},{timeout:30000});
+            await p.locator('#viewer-close').click();
+            await p.waitForSelector('#viewer',{state:'hidden'});
+
+            assert.deepEqual(errors,[]);
+            console.log('MOBILE_OK',JSON.stringify(state));
+            await b.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+          node qa-mobile.cjs
