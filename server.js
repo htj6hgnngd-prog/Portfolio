@@ -11,6 +11,7 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 const port = Number(process.env.PORT || 3000);
 const SITE_CAPTURE_WEBP = "/tmp/portfolio-denisovphoto-desktop.webp";
 const SITE_CAPTURE_PNG = path.join(root, "assets", "site-case", "denisovphoto-desktop.png");
+const PHOTO_SOURCE_DIR = path.join(root, "assets", "photos");
 
 const AI_ID = "5-9tzVe57JY";
 const ADOBE_EMBED = `https://www-ccv.adobe.io/v1/player/ccv/${AI_ID}/embed?api_key=behance1&bgcolor=%23191919`;
@@ -267,6 +268,40 @@ async function warmCartoonVideo() {
   }
 }
 
+async function serveOptimizedPhoto(req, res, id) {
+  const normalized = String(id || "").padStart(2, "0");
+  if (!/^\d{2}$/.test(normalized)) {
+    res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
+    res.end("Not found");
+    return;
+  }
+
+  const webp = `/tmp/portfolio-reportage-${normalized}.webp`;
+  const jpg = path.join(PHOTO_SOURCE_DIR, `reportage-${normalized}.jpg`);
+
+  let file = webp;
+  let contentType = "image/webp";
+  let cacheControl = "public, max-age=31536000, immutable";
+
+  try {
+    await stat(webp);
+  } catch {
+    file = jpg;
+    contentType = "image/jpeg";
+    cacheControl = "no-store, max-age=0";
+  }
+
+  const info = await stat(file);
+  res.writeHead(200, {
+    "content-type": contentType,
+    "content-length": info.size,
+    "cache-control": cacheControl
+  });
+
+  if (req.method === "HEAD") return res.end();
+  createReadStream(file).pipe(res);
+}
+
 async function serveSiteCapture(req, res) {
   let file = SITE_CAPTURE_WEBP;
   let contentType = "image/webp";
@@ -430,6 +465,12 @@ const server = http.createServer(async (req, res) => {
           return;
         }
       }
+    }
+
+    const photoMatch = url.pathname.match(/^\/media\/photos\/reportage-(\d{2})$/);
+    if (photoMatch) {
+      await serveOptimizedPhoto(req, res, photoMatch[1]);
+      return;
     }
 
     if (url.pathname === "/media/site-capture") {
