@@ -107,6 +107,22 @@ async function waitForInternal() {
 
 let mediaPrepareStarted = false;
 
+function prepareSiteCaptureInBackground() {
+  const worker = spawn(process.execPath, ["prepare-site-capture.js"], {
+    env: process.env,
+    stdio: ["ignore", "inherit", "inherit"]
+  });
+
+  worker.on("error", (error) => {
+    console.error("Site capture optimization failed to start:", error.message);
+  });
+
+  worker.on("exit", (code, signal) => {
+    if (code === 0) return;
+    console.error(`Site capture optimization exited: code=${code} signal=${signal || "none"}`);
+  });
+}
+
 function prepareEventMediaInBackground() {
   if (mediaPrepareStarted) return;
   mediaPrepareStarted = true;
@@ -168,5 +184,6 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(externalPort, "0.0.0.0", () => {
   console.log(`Portfolio proxy listening on ${externalPort}, internal app on ${internalPort}`);
+  setTimeout(prepareSiteCaptureInBackground, 250).unref();
   setTimeout(prepareEventMediaInBackground, 1500).unref();
 });
