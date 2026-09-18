@@ -1,15 +1,15 @@
 (() => {
   const photos = [
-    { src: "/media/photos/reportage-01.jpg", alt: "Репортажный кадр пространства", ratio: 1418 / 1056 },
-    { src: "/media/photos/reportage-06.jpg", alt: "Гости мероприятия", ratio: 1536 / 1024 },
-    { src: "/media/photos/reportage-09.jpg", alt: "Живой репортаж за столом", ratio: 1536 / 1024 },
-    { src: "/media/photos/reportage-05.jpg", alt: "Детали оформления события", ratio: 1536 / 1024 },
-    { src: "/media/photos/reportage-07.jpg", alt: "Композиционный кадр события", ratio: 1024 / 1536 },
-    { src: "/media/photos/reportage-04.jpg", alt: "Динамичный репортажный кадр", ratio: 1536 / 1024 },
-    { src: "/media/photos/reportage-08.jpg", alt: "Групповой репортажный портрет", ratio: 1536 / 1024 },
-    { src: "/media/photos/reportage-02.jpg", alt: "Репортажный кадр на открытом воздухе", ratio: 1536 / 1024 },
-    { src: "/media/photos/reportage-03.jpg", alt: "Портрет в пространстве", ratio: 1024 / 1536 },
-    { src: "/media/photos/reportage-10.jpg", alt: "Портрет гостей", ratio: 1536 / 1024 }
+    { src: "/assets/generated/reportage-01.webp", alt: "Репортажный кадр пространства", ratio: 1418 / 1056 },
+    { src: "/assets/generated/reportage-06.webp", alt: "Гости мероприятия", ratio: 1536 / 1024 },
+    { src: "/assets/generated/reportage-09.webp", alt: "Живой репортаж за столом", ratio: 1536 / 1024 },
+    { src: "/assets/generated/reportage-05.webp", alt: "Детали оформления события", ratio: 1536 / 1024 },
+    { src: "/assets/generated/reportage-07.webp", alt: "Композиционный кадр события", ratio: 1024 / 1536 },
+    { src: "/assets/generated/reportage-04.webp", alt: "Динамичный репортажный кадр", ratio: 1536 / 1024 },
+    { src: "/assets/generated/reportage-08.webp", alt: "Групповой репортажный портрет", ratio: 1536 / 1024 },
+    { src: "/assets/generated/reportage-02.webp", alt: "Репортажный кадр на открытом воздухе", ratio: 1536 / 1024 },
+    { src: "/assets/generated/reportage-03.webp", alt: "Портрет в пространстве", ratio: 1024 / 1536 },
+    { src: "/assets/generated/reportage-10.webp", alt: "Портрет гостей", ratio: 1536 / 1024 }
   ];
 
   const section = document.getElementById("photo");
@@ -18,7 +18,7 @@
   if (!document.querySelector('link[data-photo-styles]')) {
     const stylesheet = document.createElement("link");
     stylesheet.rel = "stylesheet";
-    stylesheet.href = "/photo.css?v=4";
+    stylesheet.href = "/photo.css?v=20260918-clean";
     stylesheet.dataset.photoStyles = "true";
     document.head.appendChild(stylesheet);
   }

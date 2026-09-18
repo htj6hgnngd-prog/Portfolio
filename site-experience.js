@@ -23,7 +23,7 @@
         '<div class="site-stage">',
           '<div class="site-canvas">',
             '<div class="site-live-viewport">',
-              '<img class="site-long-page" src="/media/site-capture?v=1" alt="Denisov Photo desktop website" loading="lazy" fetchpriority="low" decoding="async">',
+              '<img class="site-long-page" src="/assets/generated/denisovphoto-desktop.webp?v=20260918-clean" alt="Denisov Photo desktop website" loading="lazy" fetchpriority="low" decoding="async">',
               '<div class="site-form-overlay" aria-hidden="true">',
                 '<div class="site-form-card">',
                   '<button type="button" class="site-form-close">×</button>',

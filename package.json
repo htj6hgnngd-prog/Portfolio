@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node server-proxy.js"
+    "build": "node prepare-site-capture.js && node prepare-photo-assets.js",
+    "start": "node server.js"
   },
   "dependencies": {
     "ffmpeg-static": "^5.2.0"

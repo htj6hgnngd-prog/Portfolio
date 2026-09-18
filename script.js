@@ -23,6 +23,8 @@ const aiWorks = {
   }
 };
 
+const eventWorks={promo1:{title:"ПРОМО",role:"ПОЛНЫЙ ЦИКЛ",source:"https://disk.yandex.ru/i/iIj6z28I2z0d3w",video:"/media/promo-1-video"},promo2:{title:"ПРОМО 2",role:"ПОЛНЫЙ ЦИКЛ",source:"https://disk.yandex.ru/i/CGJbZxDuh1ORXw",video:"/media/promo-2-video"}};
+function renderEvent(key){const w=eventWorks[key];if(!w)return;viewerType="event";activeAIKey=null;$("#viewer-title").textContent=w.title;$("#viewer-role").textContent=w.role;$("#viewer-source").textContent="ЯНДЕКС ДИСК ↗";$("#viewer-source").href=w.source;$("#viewer-controls").hidden=true;const p=document.createElement("video");p.className="event-viewer-video";p.src=w.video;p.controls=true;p.autoplay=true;p.playsInline=true;p.preload="metadata";p.setAttribute("webkit-playsinline","");$("#viewer-frame").replaceChildren(p);openViewer();const play=p.play();if(play?.catch)play.catch(()=>{})}
 let activeVideo = 0;
 let viewerType = null;
 let activeAIKey = null;
@@ -31,26 +33,8 @@ let viewerScrollY = null;
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 
-function lockViewerScroll() {
-  if (viewerScrollY !== null) return;
-  viewerScrollY = window.scrollY;
-  document.documentElement.classList.add("modal-open");
-  document.body.classList.add("modal-open");
-  document.documentElement.style.overflow = "hidden";
-  document.body.style.overflow = "hidden";
-}
-
-function unlockViewerScroll() {
-  const y = viewerScrollY;
-  viewerScrollY = null;
-  document.documentElement.classList.remove("modal-open");
-  document.body.classList.remove("modal-open");
-  document.documentElement.style.overflow = "";
-  document.body.style.overflow = "";
-  if (y !== null && Math.abs(window.scrollY - y) > 1) {
-    requestAnimationFrame(() => window.scrollTo(0, y));
-  }
-}
+function lockViewerScroll(){if(viewerScrollY!==null)return;viewerScrollY=window.scrollY;document.documentElement.classList.add("modal-open");document.body.classList.add("modal-open")}
+function unlockViewerScroll(){const y=viewerScrollY;viewerScrollY=null;document.documentElement.classList.remove("modal-open");document.body.classList.remove("modal-open");if(y!==null&&Math.abs(window.scrollY-y)>1)requestAnimationFrame(()=>window.scrollTo(0,y))}
 function restoreAIPlayer(key = activeAIKey) {
   if (!key || !aiWorks[key]) return;
   const work = aiWorks[key];
@@ -175,36 +159,13 @@ function moveVideo(direction) {
 
 $("#youtube-featured").addEventListener("click", () => renderYoutube(activeVideo));
 $$(".work-thumb").forEach((el, index) => el.addEventListener("click", () => renderYoutube(index)));
-$$('[data-ai-work]').forEach((el) => el.addEventListener("click", () => renderAI(el.dataset.aiWork)));
+$('[data-ai-work]').forEach((el) => el.addEventListener("click", () => renderAI(el.dataset.aiWork)));
+$("[data-event-work]").forEach((el)=>el.addEventListener("click",()=>renderEvent(el.dataset.eventWork)));
 $("#viewer-close").addEventListener("click", closeViewer);
 $("#viewer-prev").addEventListener("click", () => moveVideo(-1));
 $("#viewer-next").addEventListener("click", () => moveVideo(1));
 
-const viewerElement = $("#viewer");
-const isViewerInteractiveTarget = (target) =>
-  target instanceof Element &&
-  Boolean(target.closest(".viewer-header, .viewer-frame, .viewer-controls"));
-
-viewerElement.addEventListener(
-  "pointerdown",
-  (event) => {
-    if (!isViewerInteractiveTarget(event.target)) event.stopImmediatePropagation();
-  },
-  true
-);
-
-viewerElement.addEventListener(
-  "click",
-  (event) => {
-    if (isViewerInteractiveTarget(event.target)) return;
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    resetViewer();
-  },
-  true
-);
-
-viewerElement.addEventListener("touchmove", (event) => {
+const viewerElement=$("#viewer");const isViewerInteractiveTarget=t=>t instanceof Element&&Boolean(t.closest(".viewer-header,.viewer-frame,.viewer-controls"));viewerElement.addEventListener("click",e=>{if(isViewerInteractiveTarget(e.target))return;e.preventDefault();e.stopImmediatePropagation();closeViewer()},true);viewerElement.addEventListener("touchmove", (event) => {
   const target = event.target instanceof Element ? event.target : null;
   if (!target?.closest(".viewer-frame")) event.preventDefault();
 }, { passive: false });
@@ -243,3 +204,5 @@ window.addEventListener("pagehide", resetViewer);
 
 resetViewer();
 updateNav();
+
+const loadedSections=new Set();function loadNear(id,distance,task){const target=document.getElementById(id);if(!target||loadedSections.has(id))return;const run=async()=>{if(loadedSections.has(id))return;loadedSections.add(id);try{await task()}catch(error){console.error(id+" section failed to load",error)}};if(!("IntersectionObserver"in window)){run();return}const o=new IntersectionObserver(entries=>{if(!entries.some(e=>e.isIntersecting))return;o.disconnect();run()},{rootMargin:distance+"px 0px",threshold:0});o.observe(target)}loadNear("photo",600,()=>import("/photo-gallery.js?v=20260918-clean"));

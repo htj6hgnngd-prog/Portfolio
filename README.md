@@ -1,3 +1,5 @@
-# Portfolio site
+# Portfolio
 
-One-page visual portfolio. YouTube and Behance projects open in a large in-page 16:9 viewer. Railway-ready: `npm start`.
+Production: https://portfolio-main-production-fdd5.up.railway.app
+
+Current runtime only: index.html, core.css, script.js, photo-gallery.js/photo.css, product-experience.js/css, site-experience.js/css, server.js. WebP assets are generated during build.

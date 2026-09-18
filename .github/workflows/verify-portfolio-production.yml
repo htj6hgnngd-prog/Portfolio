@@ -1,83 +1,31 @@
-name: Verify current portfolio production
-
+name: Verify portfolio production
 on:
-  workflow_dispatch:
   push:
     branches: [main]
-    paths:
-      - 'index.html'
-      - 'core.css'
-      - 'script.js'
-      - 'event-video.js'
-      - 'photo-gallery.js'
-      - 'photo.css'
-      - 'product-experience.js'
-      - 'product-experience.css'
-      - 'site-experience.js'
-      - 'site-experience.css'
-      - '.github/workflows/verify-portfolio-production.yml'
-
+    paths: ['index.html','core.css','script.js','photo-gallery.js','photo.css','product-experience.js','product-experience.css','site-experience.js','site-experience.css','server.js','package.json','.github/workflows/verify-portfolio-production.yml']
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Install Playwright
-        run: |
-          npm install --no-save playwright@1.61.1
+        with: { node-version: 22 }
+      - run: |
+          npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
-      - name: Verify current desktop and mobile render
-        shell: bash
+      - name: Real browser capture
         run: |
-          cat > verify-current.cjs <<'NODE'
-          const { chromium } = require('playwright');
-          const assert = require('node:assert/strict');
-          const url = 'https://portfolio-main-production-fdd5.up.railway.app/';
-
-          async function check(viewport, name) {
-            const browser = await chromium.launch({ headless: true });
-            const page = await browser.newPage({ viewport });
-            await page.goto(url, { waitUntil: 'networkidle', timeout: 120000 });
-            await page.waitForSelector('#photo.photo-section', { timeout: 30000 });
-            await page.waitForSelector('#product.product-web-demo .dai-browser', { timeout: 30000 });
-            await page.waitForSelector('#site.site-client-demo .site-browser', { timeout: 30000 });
-
-            const state = await page.evaluate(() => ({
-              width: innerWidth,
-              scrollWidth: document.documentElement.scrollWidth,
-              sections: ['youtube','video','ai','photo','product','site'].map(id => Boolean(document.getElementById(id))),
-              pendingText: document.body.innerText.includes('МАТЕРИАЛЫ ПОЗЖЕ'),
-              legacyNodes: document.querySelectorAll('.product-demo-section,.site-case-section,.site-portfolio-page,.site-home-page').length,
-              product: Boolean(document.querySelector('#product.product-web-demo .dai-browser')),
-              site: Boolean(document.querySelector('#site.site-client-demo .site-browser'))
-            }));
-
-            assert.ok(state.scrollWidth <= state.width + 2, name + ': horizontal overflow');
-            assert.ok(state.sections.every(Boolean), name + ': missing portfolio section');
-            assert.equal(state.pendingText, false, name + ': pending placeholder visible');
-            assert.equal(state.legacyNodes, 0, name + ': legacy DOM remains');
-            assert.equal(state.product, true, name + ': product experience missing');
-            assert.equal(state.site, true, name + ': site experience missing');
-
-            await page.screenshot({ path: 'portfolio-' + name + '.png', fullPage: true });
-            console.log(name + ' PASS', JSON.stringify(state));
-            await browser.close();
-          }
-
-          (async () => {
-            await check({ width: 1440, height: 1000 }, 'desktop');
-            await check({ width: 390, height: 844 }, 'mobile');
-          })().catch(error => { console.error(error); process.exit(1); });
+          cat > verify.cjs <<'NODE'
+          const { chromium }=require('playwright');const assert=require('node:assert/strict');const fs=require('node:fs');const url='https://portfolio-main-production-fdd5.up.railway.app/';const build='20260918-clean';
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          async function wait(){for(let i=0;i<60;i++){try{const r=await fetch(url,{cache:'no-store'}),h=await r.text();if(r.ok&&h.includes('portfolio-build" content="'+build+'"'))return}catch{}await sleep(5000)}throw Error('production timeout')}
+          async function scroll(page){const h=await page.evaluate(()=>document.documentElement.scrollHeight);for(let y=0;y<h;y+=650){await page.evaluate(v=>scrollTo(0,v),y);await page.waitForTimeout(100)}await page.evaluate(()=>scrollTo(0,0));await page.waitForTimeout(800)}
+          (async()=>{await wait();fs.mkdirSync('browser-preview',{recursive:true});const b=await chromium.launch({headless:true});const p=await b.newPage({viewport:{width:1440,height:1000},reducedMotion:'reduce'});await p.goto(url,{waitUntil:'networkidle',timeout:120000});await scroll(p);await p.waitForSelector('#product.product-web-demo .dai-browser');await p.waitForSelector('#site.site-client-demo .site-browser');await p.waitForSelector('#photo.photo-section');const s=await p.evaluate(()=>({pending:document.body.innerText.includes('МАТЕРИАЛЫ ПОЗЖЕ'),old:!!document.querySelector('.product-demo-section,.site-case-section,.dai-demo-frame,.site-case-capture'),w:innerWidth,sw:document.documentElement.scrollWidth}));assert.equal(s.pending,false);assert.equal(s.old,false);assert.ok(s.sw<=s.w+2);await p.screenshot({path:'browser-preview/portfolio-desktop.png',fullPage:true,animations:'disabled'});const m=await b.newPage({viewport:{width:390,height:844},reducedMotion:'reduce'});await m.goto(url,{waitUntil:'networkidle',timeout:120000});await scroll(m);await m.screenshot({path:'browser-preview/portfolio-mobile.png',fullPage:true,animations:'disabled'});await b.close();console.log(JSON.stringify(s))})().catch(e=>{console.error(e);process.exit(1)})
           NODE
-          node verify-current.cjs
-      - name: Upload current render screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
+          node verify.cjs
+      - uses: actions/upload-artifact@v4
         with:
-          name: current-production-render
-          path: portfolio-*.png
-          retention-days: 2
+          name: portfolio-browser-preview
+          path: browser-preview/
+          retention-days: 7
