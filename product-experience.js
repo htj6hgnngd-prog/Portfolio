@@ -100,11 +100,9 @@
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function resize() {
-    const mobileCamera = window.innerWidth <= 900;
-    const virtualWidth = mobileCamera ? 1080 : BASE_W;
-    scale = (stage.clientWidth || 1) / virtualWidth;
+    scale = (stage.clientWidth || 1) / BASE_W;
     canvas.style.transform = "scale(" + scale + ")";
-    canvas.style.left = mobileCamera ? (-((BASE_W - virtualWidth) / 2) * scale) + "px" : "0px";
+    canvas.style.left = "0px";
     stage.style.height = (BASE_H * scale) + "px";
   }
   new ResizeObserver(resize).observe(stage);
