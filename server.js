@@ -439,10 +439,10 @@ const server = http.createServer(async (req, res) => {
 
     if (url.pathname === "/media/ai-video") {
       try {
-        const buffer = await warmAIVideo();
-        serveBufferedVideo(req, res, buffer);
+        const media = await resolveAIMedia();
+        await streamRemoteVideo(req, res, media.mp4, "video/mp4");
       } catch (error) {
-        console.error("AI ad cache error:", error);
+        console.error("AI ad stream error:", error);
         try {
           const media = await resolveAIMedia();
           res.writeHead(302, { location: media.mp4, "cache-control": "no-store" });
