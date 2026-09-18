@@ -23,7 +23,7 @@ const aiWorks = {
   }
 };
 
-const eventWorks={promo1:{title:"ПРОМО",role:"ПОЛНЫЙ ЦИКЛ",source:"https://disk.yandex.ru/i/iIj6z28I2z0d3w",video:"/media/promo-1-video"},promo2:{title:"ПРОМО 2",role:"ПОЛНЫЙ ЦИКЛ",source:"https://disk.yandex.ru/i/CGJbZxDuh1ORXw",video:"/media/promo-2-video"}};
+const eventWorks={promo1:{title:"ПРОМО",role:"ПОЛНЫЙ ЦИКЛ",source:"https://disk.yandex.ru/i/iIj6z28I2z0d3w",video:"/assets/generated/promo-1.mp4?v=20260918-final6"},promo2:{title:"ПРОМО 2",role:"ПОЛНЫЙ ЦИКЛ",source:"https://disk.yandex.ru/i/CGJbZxDuh1ORXw",video:"/assets/generated/promo-2.mp4?v=20260918-final6"}};
 function renderEvent(key){const w=eventWorks[key];if(!w)return;viewerType="event";activeAIKey=null;$("#viewer-title").textContent=w.title;$("#viewer-role").textContent=w.role;$("#viewer-source").textContent="ЯНДЕКС ДИСК ↗";$("#viewer-source").href=w.source;$("#viewer-controls").hidden=true;const p=document.createElement("video");p.className="event-viewer-video";p.src=w.video;p.controls=true;p.autoplay=true;p.playsInline=true;p.preload="metadata";p.setAttribute("webkit-playsinline","");$("#viewer-frame").replaceChildren(p);openViewer();const play=p.play();if(play?.catch)play.catch(()=>{})}
 let activeVideo = 0;
 let viewerType = null;
