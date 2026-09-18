@@ -23,7 +23,6 @@
     document.head.appendChild(stylesheet);
   }
 
-  section.classList.remove("is-pending");
   section.classList.add("photo-section");
   section.innerHTML = `
     <div class="section-label">
