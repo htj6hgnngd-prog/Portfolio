@@ -26,7 +26,7 @@
             '<div class="site-live-viewport">',
               '<img class="site-long-page" src="/assets/site-case/denisovphoto-desktop.png?v=1" alt="Denisov Photo desktop website" decoding="async">',
 
-              '<div class="site-photo-viewer" aria-hidden="true">',
+              '<button class="site-portfolio-hotspot" type="button" aria-label="Открыть свадебную историю"></button>',\n              '<div class="site-photo-viewer" aria-hidden="true">',
                 '<button type="button" class="site-photo-close">×</button>',
                 '<img src="https://static.tildacdn.com/tild3137-6338-4162-b735-363931303032/30.jpg" alt="Свадебный кадр Denisov Photo">',
                 '<div class="site-photo-meta"><span>СВАДЕБНАЯ ИСТОРИЯ</span><strong>DENISOV PHOTO</strong></div>',
@@ -64,6 +64,7 @@
   const canvas = section.querySelector(".site-canvas");
   const page = section.querySelector(".site-long-page");
   const cursor = section.querySelector(".site-cursor");
+  const hotspot = section.querySelector(".site-portfolio-hotspot");
   const viewer = section.querySelector(".site-photo-viewer");
   const viewerClose = section.querySelector(".site-photo-close");
   const form = section.querySelector(".site-form-overlay");
@@ -79,7 +80,7 @@
     date: section.querySelector('[data-demo-field="date"]')
   };
 
-  if (!browser || !stage || !canvas || !page || !cursor || !viewer || !form || !submit || !formSuccess) return;
+  if (!browser || !stage || !canvas || !page || !cursor || !hotspot || !viewer || !form || !submit || !formSuccess) return;
 
   let scale = 1;
   let visible = false;
@@ -114,6 +115,15 @@
     if (reduced) return;
     cursor.style.transform = "translate3d(" + x + "px," + y + "px,0)";
     cursor.classList.add("is-visible");
+  }
+
+  function moveCursorTo(el, xRatio = .66, yRatio = .58) {
+    if (!el || reduced) return;
+    const c = canvas.getBoundingClientRect();
+    const r = el.getBoundingClientRect();
+    const x = (r.left - c.left + r.width * xRatio) / scale;
+    const y = (r.top - c.top + r.height * yRatio) / scale;
+    moveCursor(x, y);
   }
 
   function clickCursor() {
@@ -182,31 +192,35 @@
   async function fillForm(token) {
     if (!(await sleep(1500, token))) return false;
 
-    moveCursor(800, 350);
-    if (!(await sleep(1000, token))) return false;
+    moveCursorTo(fields.name);
+    if (!(await sleep(1150, token))) return false;
+    clickCursor();
     if (!(await typeField(fields.name, "Анна", token))) return false;
 
-    moveCursor(800, 455);
-    if (!(await sleep(1000, token))) return false;
+    moveCursorTo(fields.phone);
+    if (!(await sleep(1150, token))) return false;
+    clickCursor();
     if (!(await typeField(fields.phone, "+7 999 123-45-67", token))) return false;
 
-    moveCursor(800, 560);
-    if (!(await sleep(1000, token))) return false;
+    moveCursorTo(fields.telegram);
+    if (!(await sleep(1150, token))) return false;
+    clickCursor();
     if (!(await typeField(fields.telegram, "@anna", token))) return false;
 
-    moveCursor(800, 665);
-    if (!(await sleep(1000, token))) return false;
+    moveCursorTo(fields.date);
+    if (!(await sleep(1150, token))) return false;
+    clickCursor();
     if (!(await typeField(fields.date, "12-09-2027", token))) return false;
 
-    moveCursor(530, 742);
-    if (!(await sleep(1100, token))) return false;
+    moveCursorTo(consent, .08, .5);
+    if (!(await sleep(1200, token))) return false;
     clickCursor();
     consent.classList.add("is-checked");
 
-    if (!(await sleep(1300, token))) return false;
+    if (!(await sleep(1500, token))) return false;
 
-    moveCursor(760, 812);
-    if (!(await sleep(1100, token))) return false;
+    moveCursorTo(submit, .7, .55);
+    if (!(await sleep(1200, token))) return false;
     clickCursor();
     submit.classList.add("is-pressed");
     formSuccess.classList.add("is-visible");
@@ -218,55 +232,38 @@
     reset();
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
-    if (!(await sleep(2400, token))) return;
+    if (!(await sleep(2600, token))) return;
 
-    moveCursor(1090, 610);
+    // Один непрерывный проход по реальной странице к портфолио.
+    moveCursor(1080, 610);
     if (!(await sleep(1200, token))) return;
+    scrollToFraction(.52, 12500);
 
-    // Пакеты / преимущества
-    scrollToFraction(.20, 4800);
-    if (!(await sleep(5900, token))) return;
+    if (!(await sleep(13800, token))) return;
 
-    moveCursor(1040, 605);
-    if (!(await sleep(1100, token))) return;
-
-    // Editorial mood / Смотреть кадры
-    scrollToFraction(.47, 5600);
-    if (!(await sleep(6700, token))) return;
-
-    // Клик по реальному CTA "Смотреть кадры"
-    moveCursor(360, 690);
-    if (!(await sleep(1300, token))) return;
+    // Просмотр одного реального свадебного кадра. Курсор всегда попадает в hotspot.
+    moveCursorTo(hotspot, .48, .48);
+    if (!(await sleep(1500, token))) return;
     clickCursor();
     openViewer();
 
-    if (!(await sleep(3600, token))) return;
+    if (!(await sleep(4200, token))) return;
 
-    moveCursor(1364, 58);
-    if (!(await sleep(1200, token))) return;
+    moveCursorTo(viewerClose, .5, .5);
+    if (!(await sleep(1350, token))) return;
     clickCursor();
     closeViewer();
 
-    if (!(await sleep(1100, token))) return;
-
-    // Реальный блок "Свадебные истории"
-    scrollToFraction(.78, 6200);
-    if (!(await sleep(7400, token))) return;
-
-    moveCursor(980, 590);
-    if (!(await sleep(1300, token))) return;
-
-    // Небольшой дополнительный проход по реальному портфолио
-    scrollToFraction(.88, 4200);
-    if (!(await sleep(5200, token))) return;
-
-    // Реальный финальный CTA проверки даты
-    scrollToFraction(1, 4500);
-    if (!(await sleep(5600, token))) return;
-
-    moveCursor(1010, 675);
     if (!(await sleep(1400, token))) return;
-    clickCursor();
+
+    // Длинный плавный просмотр оставшейся части сайта без случайных остановок.
+    scrollToFraction(1, 15500);
+
+    if (!(await sleep(17000, token))) return;
+
+    // На финальной форме не имитируем клик в выдуманный CTA: клиент уже дошёл до формы.
+    cursor.classList.remove("is-visible");
+    if (!(await sleep(1800, token))) return;
     openForm();
 
     if (!(await fillForm(token))) return;
@@ -274,6 +271,7 @@
     if (visible && token === run) sequence(token);
   }
 
+  hotspot.addEventListener("click", openViewer);
   viewerClose.addEventListener("click", closeViewer);
   formClose.addEventListener("click", closeForm);
 
