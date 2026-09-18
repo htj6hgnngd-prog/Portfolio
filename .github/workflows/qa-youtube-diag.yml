@@ -1,0 +1,50 @@
+name: QA YouTube diagnostics
+on:
+  push:
+    branches: ['qa-youtube-diag-1789704791976']
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - run: |
+          npm install --no-save playwright@1.55.0
+          google-chrome --version
+      - name: Diagnose first YouTube open
+        run: |
+          cat > qa.cjs <<'NODE'
+          const { chromium }=require('playwright');
+          (async()=>{
+            const b=await chromium.launch({channel:'chrome',headless:true});
+            const p=await b.newPage({viewport:{width:1440,height:1000}});
+            p.on('requestfailed',r=>{if(r.url().includes('youtube'))console.log('REQFAIL',r.url(),r.failure())});
+            p.on('console',m=>{if(/youtube|error/i.test(m.text()))console.log('CONSOLE',m.type(),m.text())});
+            await p.goto('https://portfolio-main-production-fdd5.up.railway.app/',{waitUntil:'domcontentloaded',timeout:120000});
+            await p.locator('.work-thumb').nth(0).click();
+            const iframe=p.locator('#viewer iframe');
+            await iframe.waitFor({state:'attached',timeout:20000});
+            console.log('IFRAME_SRC',await iframe.getAttribute('src'));
+            for(let i=0;i<10;i++){
+              await p.waitForTimeout(1000);
+              console.log('T',i+1,'FRAMES',p.frames().map(f=>f.url()));
+            }
+            for(const f of p.frames()){
+              if(f===p.mainFrame())continue;
+              try{
+                const txt=(await f.locator('body').innerText({timeout:3000})).slice(0,1200).replace(/\n/g,' | ');
+                console.log('FRAME_TEXT',f.url(),txt);
+              }catch(e){console.log('FRAME_TEXT_ERR',f.url(),e.message)}
+            }
+            await p.screenshot({path:'youtube-first.png',fullPage:false});
+            await b.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+          node qa.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: youtube-first-diagnostic
+          path: youtube-first.png
+          retention-days: 2
