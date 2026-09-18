@@ -22,6 +22,7 @@ main{padding:0 max(24px,env(safe-area-inset-right)) 112px max(24px,env(safe-area
 
 @media(min-width:901px){
   .ai-cases{grid-template-columns:repeat(3,minmax(0,1fr));column-gap:14px;row-gap:0}
+  .ai-work--primary .work-scope{display:none}
   .ai-work--primary{grid-column:1/-1;width:100%}
   .ai-work--primary .work-meta strong{font-size:clamp(29px,2.7vw,42px);font-weight:680;line-height:.95;letter-spacing:-.04em}
   .ai-work--secondary{grid-column:3;width:100%;margin:26px 0 0}
