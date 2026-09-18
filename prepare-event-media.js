@@ -83,16 +83,29 @@ async function downloadFile(url, output) {
   await pipeline(Readable.fromWeb(response.body), createWriteStream(output));
 }
 
-async function seedCoverFromPreview(item, previewUrl) {
-  if (!previewUrl) return;
+async function seedCoverFromRemote(item, videoUrl) {
+  const at = item.coverTimes[0];
+  if (!videoUrl || !at) return false;
+
   try {
-    await downloadFile(previewUrl, item.cover);
+    await runFFmpeg([
+      "-y", "-hide_banner", "-loglevel", "error",
+      "-ss", at,
+      "-i", videoUrl,
+      "-frames:v", "1",
+      "-vf", "scale=1280:-2",
+      "-q:v", "2",
+      item.cover
+    ], `${item.name} remote cover ${at}`);
+
     const info = await stat(item.cover);
-    if (info.size < 5000) throw new Error("preview cover is too small");
-    console.log(`${item.name}: temporary cover ready from Yandex preview, ${(info.size / 1024).toFixed(0)} KB`);
+    if (info.size < 5000) throw new Error("remote cover is too small");
+    console.log(`${item.name}: cover ready before full video cache, ${(info.size / 1024).toFixed(0)} KB`);
+    return true;
   } catch (error) {
     await unlink(item.cover).catch(() => {});
-    console.warn(`${item.name}: temporary preview cover skipped: ${error.message}`);
+    console.warn(`${item.name}: early remote cover skipped: ${error.message}`);
+    return false;
   }
 }
 
@@ -137,7 +150,7 @@ for (const item of items) {
   const meta = await resolveMetadata(item.publicUrl);
   console.log(`${meta.name || item.name}: ${meta.mime_type || "unknown"}, ${Number(meta.size || 0)} bytes`);
 
-  await seedCoverFromPreview(item, meta.preview);
+  const coverReady = await seedCoverFromRemote(item, meta.file);
   await downloadFile(meta.file, item.source);
   const sourceInfo = await stat(item.source);
   if (sourceInfo.size < 100000) throw new Error(`${item.name}: downloaded source is too small`);
@@ -174,7 +187,7 @@ for (const item of items) {
     throw new Error(`${item.name}: unsupported output codec ${codec}`);
   }
 
-  await buildCover(item);
+  if (!coverReady) await buildCover(item);
 
   const videoInfo = await stat(item.video);
   const coverInfo = await stat(item.cover);
