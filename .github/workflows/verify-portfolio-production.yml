@@ -85,9 +85,8 @@ jobs:
             });
 
             assert.ok(initial.scrollWidth <= initial.viewport + 2, `desktop horizontal overflow ${initial.scrollWidth}/${initial.viewport}`);
-            assert.ok(initial.stylesheets.some(h => h.includes('/core.css?v=3')), 'core stylesheet missing');
-            assert.ok(initial.stylesheets.some(h => h.includes('/design.css?v=3')), 'premium design stylesheet missing');
-            assert.equal(initial.stylesheets.filter(h => /\/(styles|hotfix|ai)\.css/.test(h)).length, 0, 'old blocking stylesheets still loaded');
+            assert.ok(initial.stylesheets.some(h => h.includes('/core.css?v=4')), 'core stylesheet missing');
+            assert.equal(initial.stylesheets.filter(h => /\/(styles|hotfix|ai|design)\.css/.test(h)).length, 0, 'extra blocking stylesheets still loaded');
             initial.rects.forEach(r => {
               assert.ok(r.paddingTop >= 60, `${r.id}: unsafe top spacing ${r.paddingTop}`);
               assert.ok(r.paddingBottom >= 65, `${r.id}: unsafe bottom spacing ${r.paddingBottom}`);
