@@ -1,0 +1,47 @@
+name: QA cartoon playback
+on:
+  push:
+    branches: ['qa-cartoon-1789703921605']
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Test real cartoon playback on production
+        run: |
+          cat > qa.cjs <<'NODE'
+          const { chromium } = require('playwright');
+          const fs = require('node:fs');
+          const url='https://portfolio-main-production-fdd5.up.railway.app/';
+          (async()=>{
+            fs.mkdirSync('qa-artifact',{recursive:true});
+            const browser=await chromium.launch({headless:true});
+            const page=await browser.newPage({viewport:{width:1440,height:1000}});
+            const errors=[]; page.on('pageerror',e=>errors.push(e.message));
+            await page.goto(url,{waitUntil:'domcontentloaded',timeout:120000});
+            await page.locator('[data-ai-work="cartoon"]').scrollIntoViewIfNeeded();
+            await page.locator('[data-ai-work="cartoon"]').click();
+            await page.waitForSelector('#viewer.is-open #ai-cartoon-player',{timeout:30000});
+            const before=await page.evaluate(()=>{const v=document.querySelector('#viewer #ai-cartoon-player');return {readyState:v.readyState,networkState:v.networkState,error:v.error&&{code:v.error.code,message:v.error.message},videoWidth:v.videoWidth,videoHeight:v.videoHeight,currentTime:v.currentTime,src:v.currentSrc||v.src}});
+            console.log('BEFORE',JSON.stringify(before));
+            await page.evaluate(async()=>{const v=document.querySelector('#viewer #ai-cartoon-player');v.muted=true;await v.play();});
+            await page.waitForFunction(()=>{const v=document.querySelector('#viewer #ai-cartoon-player');return v&&v.currentTime>0.5&&v.videoWidth>0&&!v.error},{timeout:30000});
+            const after=await page.evaluate(()=>{const v=document.querySelector('#viewer #ai-cartoon-player');return {readyState:v.readyState,networkState:v.networkState,error:v.error&&{code:v.error.code,message:v.error.message},videoWidth:v.videoWidth,videoHeight:v.videoHeight,currentTime:v.currentTime,paused:v.paused}});
+            console.log('AFTER',JSON.stringify(after));
+            console.log('PAGE_ERRORS',JSON.stringify(errors));
+            await page.screenshot({path:'qa-artifact/cartoon-playing.png',fullPage:false});
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+          node qa.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cartoon-playback-proof
+          path: qa-artifact/
+          retention-days: 2
