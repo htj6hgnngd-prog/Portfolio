@@ -260,6 +260,39 @@ async function warmCartoonVideo() {
   }
 }
 
+async function streamRemoteVideo(req, res, href, contentType = "video/mp4") {
+  const headers = {
+    accept: "*/*",
+    "user-agent": "Mozilla/5.0 PortfolioMediaStream/1.0"
+  };
+  if (req.headers.range) headers.range = req.headers.range;
+
+  const response = await fetch(href, {
+    redirect: "follow",
+    headers
+  });
+
+  if (!response.ok && response.status !== 206) {
+    throw new Error(`Remote video returned ${response.status}`);
+  }
+
+  const outgoing = {
+    "content-type": contentType,
+    "accept-ranges": response.headers.get("accept-ranges") || "bytes",
+    "cache-control": "public, max-age=300"
+  };
+
+  const contentLength = response.headers.get("content-length");
+  const contentRange = response.headers.get("content-range");
+  if (contentLength) outgoing["content-length"] = contentLength;
+  if (contentRange) outgoing["content-range"] = contentRange;
+
+  res.writeHead(response.status === 206 ? 206 : 200, outgoing);
+  if (req.method === "HEAD" || !response.body) return res.end();
+
+  await pipeline(Readable.fromWeb(response.body), res);
+}
+
 function parseRange(range, total) {
   if (!range) return null;
   const match = /^bytes=(\d*)-(\d*)$/.exec(range);
@@ -381,18 +414,12 @@ const server = http.createServer(async (req, res) => {
 
     if (url.pathname === "/media/cartoon-video") {
       try {
-        const cached = await warmCartoonVideo();
-        serveVideoFile(req, res, cached.file, cached.size);
+        const href = await resolveCartoonDownload();
+        await streamRemoteVideo(req, res, href, "video/mp4");
       } catch (error) {
-        console.error("Cartoon cache error:", error);
-        try {
-          const href = await resolveCartoonDownload();
-          res.writeHead(302, { location: href, "cache-control": "no-store" });
-          res.end();
-        } catch {
-          res.writeHead(502, { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" });
-          res.end("Cartoon unavailable");
-        }
+        console.error("Cartoon stream error:", error);
+        res.writeHead(502, { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" });
+        res.end("Cartoon unavailable");
       }
       return;
     }
