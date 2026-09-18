@@ -3,98 +3,212 @@
   if (!section) return;
 
   section.classList.remove("is-pending");
-  section.classList.add("product-experience");
+  section.classList.add("product-showcase");
+  section.innerHTML = `
+    <div class="section-label">
+      <div class="section-number">05</div>
+      <h2>ЦИФРОВОЙ ПРОДУКТ</h2>
+      <p>DIRECT AI</p>
+      <span class="label-rule"></span>
+    </div>
 
-  section.innerHTML = [
-    '<div class="section-label">',
-      '<div class="section-number">05</div>',
-      '<h2>ЦИФРОВОЙ ПРОДУКТ</h2>',
-      '<p>DIRECT AI</p>',
-      '<span class="label-rule"></span>',
-    '</div>',
-    '<div class="section-content product-x-wrap">',
-      '<div class="product-x-intro">',
-        '<div><span class="product-x-kicker">DIRECT AI / DEMO MODE</span><h3>РАБОТА ИДЁТ.</h3></div>',
-        '<div class="product-x-legend"><span><i></i> DEMO DATA</span><b>Яндекс Директ</b></div>',
-      '</div>',
-      '<div class="product-x-story"><span id="px-step">01 / OVERVIEW</span><strong id="px-title">КАБИНЕТ ВИДЕН СРАЗУ: РАСХОД, ТРАФИК, КОНВЕРСИИ.</strong></div>',
-      '<div class="product-x-stage">',
-        '<div class="px-browser">',
-          '<div class="px-top">',
-            '<div class="px-brand"><strong>Direct AI</strong><span><i></i> DEMO DATA</span></div>',
-            '<nav class="px-nav"><button data-scene="overview" class="is-active">Сводка</button><button data-scene="campaigns">Кампании</button><button data-scene="analysis">AI-анализ</button></nav>',
-            '<span class="px-status">Агент активен</span>',
-          '</div>',
-          '<div class="px-viewport">',
-            '<section class="px-scene is-active" data-scene-panel="overview">',
-              '<div class="px-head"><div><span>СВОДКА · ПОСЛЕДНИЕ 7 ДНЕЙ</span><h4>Реклама под контролем</h4><p>Агент сверяет динамику, ищет отклонения и формирует действия.</p></div><div class="px-live"><i></i> Анализ обновлён 2 мин назад</div></div>',
-              '<div class="px-kpis">',
-                '<article><span>Расход</span><strong>86 420 ₽</strong><em>+4.8%</em></article>',
-                '<article><span>Клики</span><strong>1 284</strong><em>+9.2%</em></article>',
-                '<article><span>Конверсии</span><strong>67</strong><em>+14.6%</em></article>',
-                '<article><span>CPA</span><strong>1 290 ₽</strong><em class="good">−8.5%</em></article>',
-              '</div>',
-              '<div class="px-grid">',
-                '<div class="px-chart-card"><div class="px-card-head"><span>ДИНАМИКА РАСХОДА И КОНВЕРСИЙ</span><b>7 дней</b></div><div class="px-chart" aria-hidden="true"><span style="--h:38%"></span><span style="--h:52%"></span><span style="--h:45%"></span><span style="--h:69%"></span><span style="--h:58%"></span><span style="--h:78%"></span><span style="--h:72%"></span></div></div>',
-                '<div class="px-agent-card"><span>AI STATUS</span><strong>7 действий готовы</strong><p>18 проблемных сигналов проверены. 7 рекомендаций имеют достаточную доказательную базу.</p><div class="px-agent-feed"><b>04:21</b><span>1 248 запросов проанализировано</span><b>04:22</b><span>18 отклонений найдено</span><b>04:22</b><span>7 действий сформировано</span></div></div>',
-              '</div>',
-            '</section>',
-            '<section class="px-scene" data-scene-panel="campaigns">',
-              '<div class="px-head"><div><span>АКТИВНЫЕ КАМПАНИИ</span><h4>Кампании</h4><p>Фактическое состояние и эффективность по каждой группе.</p></div><div class="px-live"><i></i> 3 работают</div></div>',
-              '<div class="px-campaigns">',
-                '<article><div><span>Поиск | Основная</span><small>SEARCH · ACTIVE</small></div><strong>48 320 ₽</strong><b>37 конв.</b><em>CPA 1 306 ₽</em></article>',
-                '<article><div><span>Поиск | Горячий спрос</span><small>SEARCH · ACTIVE</small></div><strong>26 780 ₽</strong><b>24 конв.</b><em>CPA 1 116 ₽</em></article>',
-                '<article><div><span>Ретаргетинг</span><small>RETARGET · ACTIVE</small></div><strong>11 320 ₽</strong><b>6 конв.</b><em>CPA 1 887 ₽</em></article>',
-              '</div>',
-              '<div class="px-summary-strip"><span>ЛУЧШАЯ ДИНАМИКА</span><strong>Горячий спрос</strong><b>CPA −12.4% за период</b></div>',
-            '</section>',
-            '<section class="px-scene" data-scene-panel="analysis">',
-              '<div class="px-head"><div><span>AI ANALYSIS</span><h4>18 сигналов → 7 действий</h4><p>Агент не предлагает изменение без конкретной причины и источника.</p></div><div class="px-live"><i></i> Проверка завершена</div></div>',
-              '<div class="px-analysis-grid">',
-                '<article class="px-problem"><span>ВЫСОКИЙ РАСХОД БЕЗ КОНВЕРСИЙ</span><h5>«фотограф недорого»</h5><div><b>31 клик</b><b>4 870 ₽ расхода</b><b>0 конверсий</b></div><p>Запрос стабильно расходует бюджет и не даёт бизнес-результата в двух сравниваемых периодах.</p></article>',
-                '<article class="px-action"><span>РЕКОМЕНДАЦИЯ</span><h5>Добавить в минус-слова</h5><p>Исключить запрос из показов после подтверждения.</p><div class="px-impact"><small>POTENTIAL MONTHLY SAVING</small><strong>≈ 6 200 ₽</strong></div><button type="button">Подтвердить действие</button></article>',
-              '</div>',
-              '<div class="px-final-line"><span>DATA</span><i>→</i><span>ANALYSIS</span><i>→</i><span>DECISION</span><i>→</i><strong>ACTION</strong></div>',
-            '</section>',
-          '</div>',
-        '</div>',
-      '</div>',
-      '<div class="product-x-caption"><strong>DIRECT AI</strong><span>PRODUCT / UX / FRONTEND / BACKEND / AI / YANDEX DIRECT API</span></div>',
-    '</div>'
-  ].join("");
+    <div class="section-content product-showcase-content">
+      <div class="dai-shell" aria-label="Демонстрация Direct AI">
+        <header class="dai-bar">
+          <div class="dai-logo">Direct AI</div>
+          <nav class="dai-tabs" aria-label="Разделы Direct AI">
+            <button type="button" data-dai-target="overview" class="is-active">Сводка</button>
+            <button type="button" data-dai-target="campaigns">Кампании</button>
+            <button type="button" data-dai-target="agent">Агент</button>
+            <button type="button" data-dai-target="action">Решения</button>
+          </nav>
+          <span class="dai-demo-mark"><i></i>DEMO DATA</span>
+        </header>
 
-  const scenes = ["overview","campaigns","analysis"];
-  const nav = [...section.querySelectorAll("[data-scene]")];
-  const panels = [...section.querySelectorAll("[data-scene-panel]")];
-  const step = section.querySelector("#px-step");
-  const title = section.querySelector("#px-title");
-  const stage = section.querySelector(".product-x-stage");
-  const copy = {
-    overview:["01 / OVERVIEW","КАБИНЕТ ВИДЕН СРАЗУ: РАСХОД, ТРАФИК, КОНВЕРСИИ."],
-    campaigns:["02 / CAMPAIGNS","НЕ ПУСТЫЕ ЭКРАНЫ — ЖИВОЕ СОСТОЯНИЕ КАМПАНИЙ."],
-    analysis:["03 / AI ANALYSIS","АГЕНТ НАХОДИТ ПРОБЛЕМУ И ДОВОДИТ ЕЁ ДО КОНКРЕТНОГО ДЕЙСТВИЯ."]
-  };
+        <div class="dai-screen">
+          <section class="dai-view is-active" data-dai-view="overview">
+            <div class="dai-view-head">
+              <div><span>Последние 7 дней</span><h3>Сводка</h3></div>
+              <span class="dai-update"><i></i>обновлено сейчас</span>
+            </div>
+            <div class="dai-kpi-grid">
+              <article><span>Расход</span><strong>86 420 ₽</strong><em>+4.8%</em></article>
+              <article><span>Клики</span><strong>1 284</strong><em>+9.2%</em></article>
+              <article><span>Конверсии</span><strong>67</strong><em>+14.6%</em></article>
+              <article><span>CPA</span><strong>1 290 ₽</strong><em class="is-good">−8.5%</em></article>
+            </div>
+            <div class="dai-overview-grid">
+              <article class="dai-card dai-chart-card">
+                <div class="dai-card-title"><span>Расход / конверсии</span><b>7 дней</b></div>
+                <div class="dai-chart" aria-hidden="true">
+                  <i style="--v:42%"></i><i style="--v:55%"></i><i style="--v:48%"></i><i style="--v:67%"></i><i style="--v:61%"></i><i style="--v:79%"></i><i style="--v:72%"></i>
+                </div>
+              </article>
+              <article class="dai-card dai-feed-card">
+                <span class="dai-blue-label">AI работает</span>
+                <strong>7 действий готовы</strong>
+                <div class="dai-feed">
+                  <span><b>01</b>1 248 запросов проверено</span>
+                  <span><b>02</b>18 отклонений найдено</span>
+                  <span><b>03</b>7 действий сформировано</span>
+                </div>
+              </article>
+            </div>
+          </section>
 
-  function show(name) {
-    nav.forEach((x) => x.classList.toggle("is-active", x.dataset.scene === name));
-    panels.forEach((x) => x.classList.toggle("is-active", x.dataset.scenePanel === name));
-    step.textContent = copy[name][0];
-    title.textContent = copy[name][1];
+          <section class="dai-view" data-dai-view="campaigns">
+            <div class="dai-view-head">
+              <div><span>Рекламный кабинет</span><h3>Кампании</h3></div>
+              <span class="dai-update"><i></i>3 активны</span>
+            </div>
+            <div class="dai-campaign-table">
+              <div class="dai-campaign-row dai-campaign-row--head"><span>Кампания</span><span>Расход</span><span>Конв.</span><span>CPA</span><span>Динамика</span></div>
+              <div class="dai-campaign-row"><span><strong>Поиск | Основная</strong><small>SEARCH · ACTIVE</small></span><span>48 320 ₽</span><span>37</span><span>1 306 ₽</span><span class="dai-positive">−6.4%</span></div>
+              <div class="dai-campaign-row"><span><strong>Поиск | Горячий спрос</strong><small>SEARCH · ACTIVE</small></span><span>26 780 ₽</span><span>24</span><span>1 116 ₽</span><span class="dai-positive">−12.4%</span></div>
+              <div class="dai-campaign-row"><span><strong>Ретаргетинг</strong><small>RETARGET · ACTIVE</small></span><span>11 320 ₽</span><span>6</span><span>1 887 ₽</span><span class="dai-negative">+9.8%</span></div>
+            </div>
+            <div class="dai-insight-strip"><span>AI заметил</span><strong>В ретаргетинге CPA растёт второй период подряд</strong><button type="button" data-dai-target="agent">Разобрать →</button></div>
+          </section>
+
+          <section class="dai-view" data-dai-view="agent">
+            <div class="dai-agent-layout">
+              <aside class="dai-agent-side">
+                <span>AI AGENT</span>
+                <strong>Анализ кабинета</strong>
+                <p>Данные, причины и конкретные действия в одном диалоге.</p>
+              </aside>
+              <div class="dai-chat">
+                <div class="dai-message dai-message--user">Почему растёт CPA в ретаргетинге?</div>
+                <div class="dai-thinking"><i></i><span>Проверяю кампанию, запросы и два периода…</span></div>
+                <div class="dai-message dai-message--ai">
+                  <span>Нашёл причину</span>
+                  <strong>31 клик ушёл в запрос без конверсий</strong>
+                  <p>Запрос «фотограф недорого» потратил 4 870 ₽ и не дал ни одной конверсии. Картина повторяется второй период.</p>
+                  <button type="button" data-dai-target="action">Показать решение</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="dai-view" data-dai-view="action">
+            <div class="dai-action-layout">
+              <article class="dai-action-card dai-action-problem">
+                <span>Проблема</span>
+                <h3>«фотограф недорого»</h3>
+                <div><b>31 клик</b><b>4 870 ₽</b><b>0 конверсий</b></div>
+                <p>Запрос стабильно расходует бюджет без результата.</p>
+              </article>
+              <article class="dai-action-card dai-action-solution">
+                <span>Решение</span>
+                <h3>Добавить в минус-слова</h3>
+                <p>Изменение будет применено только после подтверждения.</p>
+                <div class="dai-saving"><small>Потенциальная экономия / месяц</small><strong>≈ 6 200 ₽</strong></div>
+                <button type="button" class="dai-confirm">Подтвердить действие</button>
+                <div class="dai-confirmed"><i>✓</i><span>Действие подготовлено</span></div>
+              </article>
+            </div>
+          </section>
+
+          <span class="dai-demo-cursor" aria-hidden="true"></span>
+        </div>
+      </div>
+    </div>`;
+
+  const views = [...section.querySelectorAll("[data-dai-view]")];
+  const buttons = [...section.querySelectorAll("[data-dai-target]")];
+  const tabs = [...section.querySelectorAll(".dai-tabs [data-dai-target]")];
+  const shell = section.querySelector(".dai-shell");
+  const screen = section.querySelector(".dai-screen");
+  const cursor = section.querySelector(".dai-demo-cursor");
+  const confirm = section.querySelector(".dai-confirm");
+  const confirmed = section.querySelector(".dai-confirmed");
+  if (!shell || !screen || !cursor || !confirm || !confirmed) return;
+
+  const order = ["overview", "campaigns", "agent", "action"];
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let index = 0;
+  let timer = 0;
+  let visible = false;
+  let manualHoldUntil = 0;
+
+  function setView(name, manual = false) {
+    const nextIndex = order.indexOf(name);
+    if (nextIndex < 0) return;
+    index = nextIndex;
+    views.forEach((view) => view.classList.toggle("is-active", view.dataset.daiView === name));
+    tabs.forEach((tab) => tab.classList.toggle("is-active", tab.dataset.daiTarget === name));
+    confirmed.classList.remove("is-visible");
+    confirm.classList.remove("is-pressed");
+    if (manual) manualHoldUntil = performance.now() + 7000;
   }
-  nav.forEach((x) => x.addEventListener("click", () => show(x.dataset.scene)));
 
-  let ticking = false;
-  function sync() {
-    ticking = false;
-    const r = stage.getBoundingClientRect();
-    const vh = window.innerHeight || 800;
-    const p = Math.max(0, Math.min(1, (vh * .78 - r.top) / Math.max(vh * 1.25, r.height)));
-    const idx = p < .34 ? 0 : p < .69 ? 1 : 2;
-    show(scenes[idx]);
-    const scale = .94 + Math.min(1, p * 1.35) * .06;
-    stage.style.setProperty("--px-scale", scale.toFixed(4));
+  function cursorTo(target) {
+    if (!target || reduceMotion) return;
+    const a = screen.getBoundingClientRect();
+    const b = target.getBoundingClientRect();
+    const x = b.left - a.left + Math.min(b.width * .72, b.width - 8);
+    const y = b.top - a.top + b.height * .62;
+    cursor.style.transform = `translate3d(${x}px,${y}px,0)`;
+    cursor.classList.add("is-visible");
   }
-  window.addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(sync); } }, {passive:true});
-  window.addEventListener("resize", sync, {passive:true});
-  sync();
+
+  function clickCursor() {
+    cursor.classList.remove("is-clicking");
+    void cursor.offsetWidth;
+    cursor.classList.add("is-clicking");
+  }
+
+  function schedule(delay = 3000) {
+    clearTimeout(timer);
+    if (!visible || reduceMotion) return;
+    timer = window.setTimeout(playStep, delay);
+  }
+
+  function playStep() {
+    if (!visible || reduceMotion) return;
+    if (performance.now() < manualHoldUntil) return schedule(1500);
+
+    const next = order[(index + 1) % order.length];
+    const target = tabs.find((tab) => tab.dataset.daiTarget === next) || confirm;
+    cursorTo(target);
+    timer = window.setTimeout(() => {
+      clickCursor();
+      timer = window.setTimeout(() => {
+        setView(next);
+        if (next === "action") {
+          timer = window.setTimeout(() => {
+            cursorTo(confirm);
+            timer = window.setTimeout(() => {
+              clickCursor();
+              confirm.classList.add("is-pressed");
+              confirmed.classList.add("is-visible");
+              schedule(2600);
+            }, 700);
+          }, 1700);
+        } else {
+          schedule(next === "agent" ? 3800 : 3200);
+        }
+      }, 340);
+    }, 620);
+  }
+
+  buttons.forEach((button) => button.addEventListener("click", () => {
+    const target = button.dataset.daiTarget;
+    if (target) setView(target, true);
+    schedule(7000);
+  }));
+
+  confirm.addEventListener("click", () => {
+    confirm.classList.add("is-pressed");
+    confirmed.classList.add("is-visible");
+    manualHoldUntil = performance.now() + 6000;
+  });
+
+  const observer = new IntersectionObserver((entries) => {
+    visible = Boolean(entries[0]?.isIntersecting);
+    clearTimeout(timer);
+    if (visible) schedule(2200);
+    else cursor.classList.remove("is-visible");
+  }, { threshold: .28 });
+  observer.observe(shell);
 })();
