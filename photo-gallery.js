@@ -20,7 +20,7 @@
   section.innerHTML = `
     <div class="section-label">
       <div class="section-number">04</div>
-      <h2>РЕПОРТАЖНАЯ ФОТОГРАФИЯ</h2>
+      <h2>ФОТО</h2>
       <p>РЕПОРТАЖ / СОБЫТИЯ / ЛЮДИ</p>
       <span class="label-rule"></span>
     </div>
