@@ -2,7 +2,7 @@
   if (!document.querySelector('link[href^="/site-case.css"]')) {
     const stylesheet = document.createElement("link");
     stylesheet.rel = "stylesheet";
-    stylesheet.href = "/site-case.css?v=4";
+    stylesheet.href = "/site-case.css?v=5";
     document.head.appendChild(stylesheet);
   }
 
@@ -14,7 +14,7 @@
   section.innerHTML = `
     <div class="section-label">
       <div class="section-number">06</div>
-      <h2>САЙТ</h2>
+      <h2>ВЕБ-РАЗРАБОТКА</h2>
       <p>WEB / UX / BUILD</p>
       <span class="label-rule"></span>
     </div>
