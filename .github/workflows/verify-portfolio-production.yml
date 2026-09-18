@@ -74,12 +74,12 @@ jobs:
             });
 
             assert.ok(initial.scrollWidth <= initial.viewport + 2, `desktop horizontal overflow ${initial.scrollWidth}/${initial.viewport}`);
-            assert.ok(initial.stylesheets.some(h => h.includes('/core.css?v=2')), 'core stylesheet missing');
+            assert.ok(initial.stylesheets.some(h => h.includes('/core.css?v=3')), 'core stylesheet missing');
             assert.equal(initial.stylesheets.filter(h => /\/(styles|hotfix|ai)\.css/.test(h)).length, 0, 'old blocking stylesheets still loaded');
             initial.rects.forEach(r => {
               assert.ok(r.paddingTop >= 40, `${r.id}: unsafe top spacing ${r.paddingTop}`);
               assert.ok(r.paddingBottom >= 45, `${r.id}: unsafe bottom spacing ${r.paddingBottom}`);
-              assert.ok(r.borderBottom >= 3, `${r.id}: section divider missing`);
+              assert.ok(r.borderBottom >= 1, `${r.id}: section divider missing`);
             });
             for (let i=1;i<initial.rects.length;i++) {
               assert.ok(initial.rects[i].top >= initial.rects[i-1].bottom - 2, `sections overlap: ${initial.rects[i-1].id}/${initial.rects[i].id}`);
@@ -118,6 +118,22 @@ jobs:
             assert.ok(typography.secondaryAI <= 44, `desktop secondary AI title unexpectedly large ${typography.secondaryAI}`);
             assert.equal(typography.hasLongDash, false, 'long dash found in visible copy');
 
+            const chrome = await page.evaluate(() => {
+              const active = getComputedStyle(document.querySelector('.nav-grid button.is-active'));
+              const hero = getComputedStyle(document.querySelector('.hero'));
+              const section = getComputedStyle(document.querySelector('#youtube'));
+              return {
+                activeBg: active.backgroundColor,
+                navRadius: parseFloat(getComputedStyle(document.querySelector('.nav-grid')).borderRadius),
+                heroBorder: hero.borderBottomColor,
+                sectionBorder: section.borderBottomColor
+              };
+            });
+            assert.ok(chrome.navRadius >= 14, 'navigation is not rounded');
+            assert.notEqual(chrome.activeBg, 'rgb(241, 12, 24)', 'active navigation still uses red fill');
+            assert.notEqual(chrome.heroBorder, 'rgb(241, 12, 24)', 'hero still has red divider');
+            assert.notEqual(chrome.sectionBorder, 'rgb(241, 12, 24)', 'section still has red divider');
+
             const finalOverflow = await page.evaluate(() => [document.documentElement.scrollWidth, innerWidth]);
             assert.ok(finalOverflow[0] <= finalOverflow[1] + 2, `desktop overflow after dynamic sections ${finalOverflow}`);
             console.log('desktop PASS', JSON.stringify({initialRequests:requests.length, productStep:[p1,p2]}));
@@ -139,7 +155,7 @@ jobs:
               mainLeft: document.querySelector('main')?.getBoundingClientRect().left
             }));
             assert.ok(state.scrollWidth <= state.viewport + 2, `mobile horizontal overflow ${state.scrollWidth}/${state.viewport}`);
-            assert.ok(state.navHeight >= 80 && state.navHeight <= 96, `mobile nav unsafe height ${state.navHeight}`);
+            assert.ok(state.navHeight >= 44 && state.navHeight <= 54, `mobile nav unsafe height ${state.navHeight}`);
             assert.ok(state.productWidth <= state.viewport - 20, `product frame too wide ${state.productWidth}`);
             assert.ok(state.siteWidth <= state.viewport - 20, `site frame too wide ${state.siteWidth}`);
             assert.ok(state.mainLeft >= 0, 'main shifted outside viewport');
