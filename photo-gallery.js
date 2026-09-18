@@ -18,7 +18,7 @@
   if (!document.querySelector('link[data-photo-styles]')) {
     const stylesheet = document.createElement("link");
     stylesheet.rel = "stylesheet";
-    stylesheet.href = "/photo.css?v=3";
+    stylesheet.href = "/photo.css?v=4";
     stylesheet.dataset.photoStyles = "true";
     document.head.appendChild(stylesheet);
   }
@@ -28,7 +28,7 @@
   section.innerHTML = `
     <div class="section-label">
       <div class="section-number">04</div>
-      <h2>ФОТО</h2>
+      <h2>РЕПОРТАЖНАЯ ФОТОГРАФИЯ</h2>
       <p>РЕПОРТАЖ / СОБЫТИЯ / ЛЮДИ</p>
       <span class="label-rule"></span>
     </div>
