@@ -2,7 +2,6 @@
   const section = document.getElementById("site");
   if (!section) return;
 
-  section.classList.remove("is-pending", "site-showcase");
   section.classList.add("site-client-demo");
 
   section.innerHTML = [
