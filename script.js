@@ -124,6 +124,10 @@ function renderAI(key) {
   if (!frame) return;
 
   if (!player) return;
+  if (key === "cartoon") {
+    player.src = "/api/cartoon-video";
+  }
+
   if (key === "ad") {
     // Stable same-origin proxy resolves Yandex's temporary signed URL per request.
     player.src = "/api/ai-video";
