@@ -12,8 +12,10 @@ export default async function handler(req, res) {
     if (!response.ok) throw new Error("Yandex link resolution failed: " + response.status);
     const { href } = await response.json();
     if (!href || !href.startsWith("https://")) throw new Error("Yandex did not return a valid media URL");
+    const mediaUrl = new URL(href);
+    mediaUrl.searchParams.set("disposition", "inline");
     res.statusCode = 302;
-    res.setHeader("Location", href);
+    res.setHeader("Location", mediaUrl.toString());
     res.setHeader("Cache-Control", "no-store");
     res.setHeader("Referrer-Policy", "no-referrer");
     return res.end();
