@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node prepare-site-capture.js && node prepare-photo-assets.js && node prepare-event-media.js",
+    "build": "node -e \"console.log(\u0027Static portfolio build: media assets are prepared in the repository\u0027)\"",
     "start": "node server.js"
   },
   "dependencies": {
