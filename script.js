@@ -121,7 +121,29 @@ function renderAI(key) {
 
   const player = document.getElementById(work.playerId);
   const frame = $("#viewer-frame");
-  if (!player || !frame) return;
+  if (!frame) return;
+
+  if (key === "ad") {
+    if (activeAIKey && activeAIKey !== key) restoreAIPlayer(activeAIKey);
+    viewerType = "ai-embed";
+    activeAIKey = null;
+    $("#viewer-title").textContent = work.title;
+    $("#viewer-role").textContent = work.role;
+    $("#viewer-source").textContent = work.sourceLabel;
+    $("#viewer-source").href = work.source;
+    $("#viewer-controls").hidden = true;
+    const iframe = document.createElement("iframe");
+    iframe.src = "https://www.behance.net/embed/project/230138193?ilo0=1";
+    iframe.title = "Veo 3 | AI Ads — Сергей Денисов";
+    iframe.allow = "autoplay; fullscreen; picture-in-picture";
+    iframe.allowFullscreen = true;
+    iframe.loading = "eager";
+    iframe.referrerPolicy = "strict-origin-when-cross-origin";
+    frame.replaceChildren(iframe);
+    openViewer();
+    return;
+  }
+  if (!player) return;
 
   if (activeAIKey && activeAIKey !== key) restoreAIPlayer(activeAIKey);
 
