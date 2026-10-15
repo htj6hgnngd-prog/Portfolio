@@ -125,9 +125,8 @@ function renderAI(key) {
 
   if (!player) return;
   if (key === "ad") {
-    // Use the MP4 resolved from the user's public Yandex Disk share.
-    // This signed URL is temporary; replace with permanent hosted media for long-term reliability.
-    player.src = "https://downloader.disk.yandex.ru/disk/ca8ae6ea93ab4c0c518b33c7cdfda77bb753e086ad04891dcd888102b018ef64/6ad1014e/qK8L0_pDpkDtZuq4JEoAcxuIHWEW11P33HI8_-XgGwVr0wvPI4v4hQy6PSHicM4ttst-I5ZjKqsrl-rSWUWpKg%3D%3D?uid=0&filename=5-9tzVe57JY_576.mp4&disposition=attachment&hash=Lq505bIQBn665EZE97LRGMggEAupYde26yd5wraWZ4EOp2lxUxbFjxMaI3ai9SBNq%2FJ6bpmRyOJonT3VoXnDag%3D%3D%3A&limit=0&content_type=video%2Fmp4&owner_uid=879735468&fsize=8170842&hid=7b4366f5eb1134ab8ebbf9e21fcdf905&media_type=video&tknv=v3&is_direct_zip_experiment=1";
+    // Stable same-origin proxy resolves Yandex's temporary signed URL per request.
+    player.src = "/api/ai-video";
     player.poster = "https://mir-s3-cdn-cf.behance.net/projects/max_808_webp/2d7dea230138193.6aabe32f95392.jpg";
   }
 
