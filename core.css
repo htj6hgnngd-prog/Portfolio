@@ -34,3 +34,8 @@ main{padding:0 max(24px,env(safe-area-inset-right)) 112px max(24px,env(safe-area
   .ai-work--secondary .work-meta>span{padding:0;color:var(--muted);font-size:11px;font-weight:620;line-height:1.25;text-align:left}
   .ai-work--secondary .work-scope{padding:6px 2px 0;color:var(--muted);font-size:9.5px;font-weight:620;line-height:1.35}
 }
+
+/* Video playback controls are disabled on card previews, but must be interactive in the modal. */
+.viewer-frame video.ai-native-video,.viewer-frame video.event-viewer-video{position:relative;inset:auto;display:block;width:100%;height:100%;max-height:calc(100vh - 150px);object-fit:contain;pointer-events:auto!important;background:#000;z-index:2}
+.viewer-frame video.ai-native-video::-webkit-media-controls,.viewer-frame video.event-viewer-video::-webkit-media-controls{display:flex!important;opacity:1!important}
+@media(max-width:700px){.viewer{padding:8px}.viewer-shell{width:100%;max-height:calc(100dvh - 16px)}.viewer-frame{height:auto;max-height:calc(100dvh - 110px);aspect-ratio:16/9}.viewer-frame video.ai-native-video,.viewer-frame video.event-viewer-video{max-height:calc(100dvh - 110px);object-fit:contain}.viewer-header{min-height:58px;gap:10px}.viewer-title{gap:10px}.viewer-title strong{font-size:clamp(18px,5vw,28px)}.viewer-title span{font-size:12px}}
