@@ -24,7 +24,7 @@ const aiWorks = {
 };
 
 const eventWorks={promo1:{title:"ПРОМО",role:"ПОЛНЫЙ ЦИКЛ",source:"https://disk.yandex.ru/i/iIj6z28I2z0d3w",video:"/api/promo-1-video"},promo2:{title:"ПРОМО 2",role:"ПОЛНЫЙ ЦИКЛ",source:"https://disk.yandex.ru/i/CGJbZxDuh1ORXw",video:"/api/promo-2-video"}};
-function renderEvent(key){const w=eventWorks[key];if(!w)return;viewerType="event";activeAIKey=null;$("#viewer-title").textContent=w.title;$("#viewer-role").textContent=w.role;$("#viewer-source").textContent="ЯНДЕКС ДИСК ↗";$("#viewer-source").href=w.source;$("#viewer-controls").hidden=true;const p=document.createElement("video");p.className="event-viewer-video";p.src=w.video;p.controls=true;p.autoplay=true;p.playsInline=true;p.preload="metadata";p.setAttribute("webkit-playsinline","");$("#viewer-frame").replaceChildren(p);openViewer();const play=p.play();if(play?.catch)play.catch(()=>{})}
+function renderEvent(key){const w=eventWorks[key];if(!w)return;viewerType="event";activeAIKey=null;$("#viewer-title").textContent=w.title;$("#viewer-role").textContent=w.role;$("#viewer-source").textContent="ОТКРЫТЬ НА ЯНДЕКС ДИСКЕ ↗";$("#viewer-source").href=w.source;$("#viewer-controls").hidden=true;const frame=$("#viewer-frame");const iframe=document.createElement("iframe");iframe.src=w.source+"?embed=1";iframe.title=w.title;iframe.allow="autoplay; fullscreen; picture-in-picture";iframe.allowFullscreen=true;iframe.referrerPolicy="no-referrer";iframe.loading="eager";frame.replaceChildren(iframe);openViewer()}
 let activeVideo = 0;
 let viewerType = null;
 let activeAIKey = null;
@@ -115,55 +115,7 @@ function renderYoutube(index) {
   });
 }
 
-function renderAI(key) {
-  const work = aiWorks[key];
-  if (!work) return;
-
-  const player = document.getElementById(work.playerId);
-  const frame = $("#viewer-frame");
-  if (!frame) return;
-
-  if (!player) return;
-  if (key === "cartoon") {
-    player.src = "/api/cartoon-video";
-  }
-
-  if (key === "ad") {
-    // Stable same-origin proxy resolves Yandex's temporary signed URL per request.
-    player.src = "/api/ai-video";
-    player.poster = "https://mir-s3-cdn-cf.behance.net/projects/max_808_webp/2d7dea230138193.6aabe32f95392.jpg";
-  }
-
-  if (activeAIKey && activeAIKey !== key) restoreAIPlayer(activeAIKey);
-
-  if (key === "cartoon") {
-    const cover = document.getElementById("cartoon-cover-img");
-    const coverSrc = cover?.currentSrc || cover?.src;
-    if (coverSrc) player.poster = coverSrc;
-  }
-  player.preload = "auto";
-  try { player.load(); } catch {}
-
-  viewerType = "ai";
-  activeAIKey = key;
-  $("#viewer-title").textContent = work.title;
-  $("#viewer-role").textContent = work.role;
-  $("#viewer-source").textContent = work.sourceLabel;
-  $("#viewer-source").href = work.source;
-  $("#viewer-controls").hidden = true;
-
-  player.controls = true;
-  player.muted = false;
-  player.setAttribute("tabindex", "0");
-  player.setAttribute("aria-hidden", "false");
-  try { player.currentTime = 0; } catch {}
-  frame.replaceChildren(player);
-
-  openViewer();
-
-  const playPromise = player.play();
-  if (playPromise?.catch) playPromise.catch(() => {});
-}
+function renderAI(key){const work=aiWorks[key];if(!work)return;const frame=$("#viewer-frame");if(!frame)return;viewerType="ai";activeAIKey=key;$("#viewer-title").textContent=work.title;$("#viewer-role").textContent=work.role;$("#viewer-source").textContent=work.sourceLabel;$("#viewer-source").href=work.source;$("#viewer-controls").hidden=true;const shareUrl=key==="cartoon"?"https://disk.yandex.ru/i/Q6JaTkvI-IB1tw":"https://www.behance.net/gallery/230138193/Veo-3-AI-Ads";const iframe=document.createElement("iframe");iframe.src=shareUrl;iframe.title=work.title;iframe.allow="autoplay; fullscreen; picture-in-picture";iframe.allowFullscreen=true;iframe.referrerPolicy="strict-origin-when-cross-origin";iframe.loading="eager";frame.replaceChildren(iframe);openViewer()}
 
 function openViewer() {
   const viewer = $("#viewer");
